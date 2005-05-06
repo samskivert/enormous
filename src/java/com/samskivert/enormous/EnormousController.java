@@ -44,6 +44,23 @@ public class EnormousController extends Controller
         _active[teamIndex] = active;
         active.score = 0;
         _panel.getTeamSprite(teamIndex).setPlayer(active);
+        _panel.clearTeamConfig();
+    }
+
+    public void cashInPoints (int teamIndex)
+    {
+        Player active = _active[teamIndex];
+        if (active == null) {
+            return;
+        }
+        if (active.score < 6) {
+            return;
+        }
+        int stars = (active.score - 3) / 3;
+        active.score = active.score % 3;
+        active.stars += stars;
+        _panel.getTeamSprite(teamIndex).setPlayer(active);
+        _panel.getTeamSprite(teamIndex).addStars(stars);
     }
 
     /**
@@ -141,13 +158,14 @@ public class EnormousController extends Controller
             String[] bits = StringUtil.split(cmd, ":");
             try {
                 int tidx = Integer.parseInt(bits[1]);
-                _panel.showTeamConfig(tidx, _active[tidx]);
+                if ((action.getModifiers() & ActionEvent.SHIFT_MASK) != 0) {
+                    cashInPoints(tidx);
+                } else {
+                    _panel.showTeamConfig(tidx, _active[tidx]);
+                }
             } catch (Exception e) {
                 e.printStackTrace(System.err);
             }
-
-        } else if (cmd.startsWith("dismiss_config")) {
-            _panel.clearTeamConfig();
 
         } else if (cmd.equals("dismiss")) {
             _panel.dismissQuestion();

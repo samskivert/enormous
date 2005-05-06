@@ -44,15 +44,10 @@ public class TeamSprite extends SausageSprite
         }
     }
 
-    public void setTeamStars (int stars)
+    public void addStars (int stars)
     {
-        _stars = stars;
+        _stars += stars;
         invalidate();
-    }
-
-    public int getTeamStars ()
-    {
-        return _stars;
     }
 
     public void setPlayer (Player player)

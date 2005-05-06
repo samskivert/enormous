@@ -13,6 +13,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import com.samskivert.swing.GroupLayout;
 import com.samskivert.swing.VGroupLayout;
 
 /**
@@ -32,6 +33,7 @@ public class TeamConfigDialog extends JPanel
         JLabel label = new JLabel("Change player:");
         label.setForeground(Color.white);
         add(label);
+
         String ptext = (active == null) ? "" : active.name;
         add(_text = new JTextField(ptext) {
             public Dimension getPreferredSize () {
@@ -40,16 +42,17 @@ public class TeamConfigDialog extends JPanel
                 return d;
             }
         });
-
-        JButton done = new JButton("Dismiss");
-        done.setActionCommand("dismiss_config");
-        done.addActionListener(new ActionListener() {
+        _text.addActionListener(new ActionListener() {
             public void actionPerformed (ActionEvent event) {
                 _ctrl.setActivePlayer(_teamIdx, _text.getText());
-                _ctrl.handleAction(event);
             }
         });
-        add(done);
+    }
+
+    public void addNotify ()
+    {
+        super.addNotify();
+        _text.requestFocus();
     }
 
     protected EnormousController _ctrl;
