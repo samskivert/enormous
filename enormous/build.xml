@@ -1,0 +1,48 @@
+<!-- build configuration -->
+<project name="enormous" default="compile" basedir=".">
+
+  <property name="app.name"    value="enormous"/>
+  <property name="src.dir"     value="src/java"/>
+  <property name="deploy.dir"  value="dist"/>
+  <property name="dist.jar"    value="${app.name}.jar"/>
+  <property name="classes.dir" value="${deploy.dir}/classes"/>
+
+  <!-- declare our classpath -->
+  <path id="classpath">
+    <pathelement location="${classes.dir}"/>
+    <fileset dir="lib" includes="**/*.jar"/>
+  </path>
+
+  <!-- prepares the application directories -->
+  <target name="prepare">
+    <mkdir dir="${deploy.dir}"/>
+    <mkdir dir="${classes.dir}"/>
+    <mkdir dir="${classes.dir}/rsrc"/>
+    <!-- copy media and properties into the target directory -->
+    <copy todir="${classes.dir}/rsrc">
+      <fileset dir="rsrc" includes="**/*"/>
+    </copy>
+    <copy todir="${classes.dir}">
+      <fileset dir="${src.dir}" includes="**/*.properties"/>
+    </copy>
+  </target>
+
+  <!-- cleans out the built application -->
+  <target name="clean">
+    <delete dir="${deploy.dir}"/>
+  </target>
+
+  <!-- build the java class files -->
+  <target name="compile" depends="prepare">
+    <javac srcdir="${src.dir}" destdir="${classes.dir}"
+           debug="on" optimize="on" deprecation="on" source="1.4">
+      <classpath refid="classpath"/>
+    </javac>
+  </target>
+
+  <!-- builds our distribution files (war and jar) -->
+  <target name="dist" depends="prepare,compile">
+    <jar destfile="${deploy.dir}/${dist.jar}"
+         basedir="${classes.dir}"/>
+  </target>
+</project>
