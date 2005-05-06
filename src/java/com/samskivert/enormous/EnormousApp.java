@@ -3,9 +3,12 @@
 
 package com.samskivert.enormous;
 
+import java.awt.EventQueue;
 import javax.swing.JFrame;
 
 import com.samskivert.swing.util.SwingUtil;
+import com.samskivert.util.RunQueue;
+
 import com.threerings.media.FrameManager;
 
 /**
@@ -13,6 +16,15 @@ import com.threerings.media.FrameManager;
  */
 public class EnormousApp
 {
+    public static RunQueue queue = new RunQueue() {
+        public void postRunnable (Runnable r) {
+            EventQueue.invokeLater(r);
+        }
+        public boolean isDispatchThread () {
+            return EventQueue.isDispatchThread();
+        }
+    };
+
     public static void main (String[] args)
     {
         // create and display the interface

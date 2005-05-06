@@ -24,7 +24,6 @@ public class EnormousController extends Controller
     public void playerResponded (int teamIndex)
     {
         System.err.println("Player " + teamIndex);
-        _panel.getQuestionSprite().setText("Player " + (teamIndex+1));
     }
 
     // documentation inherited
@@ -37,6 +36,17 @@ public class EnormousController extends Controller
                 int catidx = Integer.parseInt(bits[1]);
                 int qidx = Integer.parseInt(bits[2]);
                 _panel.displayQuestion(catidx, qidx);
+            } catch (Exception e) {
+                e.printStackTrace(System.err);
+            }
+
+        } else if (cmd.startsWith("team:")) {
+            String[] bits = StringUtil.split(cmd, ":");
+            try {
+                int tidx = Integer.parseInt(bits[1]);
+                TeamSprite sprite = _panel.getTeamSprite(tidx);
+                sprite.setTeamStars(sprite._stars+1);
+
             } catch (Exception e) {
                 e.printStackTrace(System.err);
             }

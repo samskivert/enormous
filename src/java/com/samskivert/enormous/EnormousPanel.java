@@ -17,6 +17,7 @@ import java.util.HashMap;
 
 import com.samskivert.swing.Controller;
 import com.samskivert.swing.ControllerProvider;
+import com.samskivert.util.Interval;
 
 import com.threerings.media.FrameManager;
 import com.threerings.media.MediaPanel;
@@ -71,12 +72,11 @@ public class EnormousPanel extends MediaPanel
         int tcount = EnormousConfig.getTeamCount();
         int twidth = (width - (tcount-1)*GAP) / tcount;
         int tx = GAP;
-        _tsprites = new SausageSprite[tcount];
+        _tsprites = new TeamSprite[tcount];
         for (int ii = 0; ii < _tsprites.length; ii++) {
-            String tname = EnormousConfig.getTeamName(ii);
-            _tsprites[ii] = new SausageSprite(
-                twidth, FOOTER, tname, EnormousConfig.teamFont,
-                EnormousConfig.getTeamColor(ii), "team:" + ii);
+            _tsprites[ii] = new TeamSprite(
+                twidth, FOOTER, ii, EnormousConfig.teamFont,
+                EnormousConfig.getTeamColor(ii));
             _tsprites[ii].setLocation(tx, height - FOOTER - GAP);
             addSprite(_tsprites[ii]);
             tx += (twidth + GAP);
@@ -139,6 +139,14 @@ public class EnormousPanel extends MediaPanel
     }
 
     /**
+     * Returns the team sprite for the specified team.
+     */
+    public TeamSprite getTeamSprite (int teamIdx)
+    {
+        return _tsprites[teamIdx];
+    }
+
+    /**
      * Displays the specified question.
      */
     public void displayQuestion (int catidx, int qidx)
@@ -147,6 +155,14 @@ public class EnormousPanel extends MediaPanel
         if (_qsprite != null) {
             dismissQuestion();
         }
+
+        // note that this is the active question
+        _acidx = catidx;
+        _aqidx = qidx;
+
+        // mark the question itself as having been seen
+        getQuestionSprite(catidx, qidx).setBackground(
+            EnormousConfig.seenQuestionColor);
 
         // display only the category in question
         for (int ii = 0; ii < _catsprites.length; ii++) {
@@ -179,6 +195,10 @@ public class EnormousPanel extends MediaPanel
             }
         }
 
+        // clear the active question and player
+        _acidx = _aqidx = -1;
+        clearActivePlayer();
+
         if (_qsprite == null) {
             return;
         }
@@ -188,6 +208,7 @@ public class EnormousPanel extends MediaPanel
             }
         });
         _qsprite.move(new LinePath(new Point(getWidth(), 100 + 2*GAP), 500L));
+        _qsprite = null;
     }
 
     // documentation inherited from interface ControllerProvider
@@ -208,9 +229,39 @@ public class EnormousPanel extends MediaPanel
         // if we have a question active, pressing a key indicates that one
         // of the players is responding to the question
         if (_qsprite != null) {
-            int pidx = ((int)e.getKeyChar() - '0');
-            if (pidx >= 0 && pidx < _tsprites.length) {
-                _ctrl.playerResponded(pidx);
+            char key = e.getKeyChar();
+            if (key == 'y') {
+                _qsprite.setText("Correct!");
+                new Interval(EnormousApp.queue) {
+                    public void expired () {
+                        dismissQuestion();
+                    }
+                }.schedule(1000l);
+
+            } else if (key == 'n') {
+                _qsprite.setText("Bzzzzzt!");
+                new Interval(EnormousApp.queue) {
+                    public void expired () {
+                        clearActivePlayer();
+                        if (_acidx != -1) {
+                            _qsprite.setText(EnormousConfig.getQuestion(
+                                                 _round, _acidx, _aqidx));
+                        }
+                    }
+                }.schedule(1000l);
+
+            } else if (key == 'c') {
+                clearActivePlayer();
+                if (_acidx != -1) {
+                    _qsprite.setText(EnormousConfig.getQuestion(
+                                         _round, _acidx, _aqidx));
+                }
+
+            } else if (key >= '1' && key <= '9' && _apidx == -1) {
+                int pidx = key - '1';
+                if (pidx >= 0 && pidx < _tsprites.length) {
+                    handlePlayerResponse(pidx);
+                }
             }
         }
     }
@@ -222,6 +273,12 @@ public class EnormousPanel extends MediaPanel
     }
 
     // documentation inherited
+    public Dimension getPreferredSize ()
+    {
+        return new Dimension(800, 600);
+    }
+
+    // documentation inherited
     protected void paintBehind (Graphics2D gfx, Rectangle dirtyRect)
     {
         super.paintBehind(gfx, dirtyRect);
@@ -229,21 +286,42 @@ public class EnormousPanel extends MediaPanel
         gfx.fill(dirtyRect);
     }
 
-    // documentation inherited
-    public Dimension getPreferredSize ()
+    protected void handlePlayerResponse (int pidx)
     {
-        return new Dimension(800, 600);
+        // note that this player is the "active" player
+        _apidx = pidx;
+
+        // show only the active player's team display
+        for (int ii = 0; ii < _tsprites.length; ii++) {
+            if (_apidx != ii) {
+                removeSprite(_tsprites[ii]);
+            }
+        }
+
+        // let the controller know
+        _ctrl.playerResponded(pidx);
     }
 
-    protected int _round;
+    protected void clearActivePlayer ()
+    {
+        _apidx = -1;
+        for (int ii = 0; ii < _tsprites.length; ii++) {
+            if (!isManaged(_tsprites[ii])) {
+                addSprite(_tsprites[ii]);
+            }
+        }
+    }
+
     protected EnormousController _ctrl;
+    protected int _round;
 
     protected SausageSprite[] _catsprites;
     protected HashMap<Integer,SausageSprite> _qsprites =
         new HashMap<Integer,SausageSprite>();
+    protected TeamSprite[] _tsprites;
 
     protected SausageSprite _qsprite;
-    protected SausageSprite[] _tsprites;
+    protected int _acidx = -1, _aqidx = -1, _apidx = -1;
 
     protected static final int HEADER = 100;
     protected static final int FOOTER = 100;
