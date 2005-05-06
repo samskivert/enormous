@@ -81,6 +81,7 @@ public class EnormousPanel extends MediaPanel
             addSprite(_tsprites[ii]);
             tx += (twidth + GAP);
         }
+        _ctrl.configureTeams(_tsprites);
 
         // compute some metrics for the round
         int catcount = EnormousConfig.getCategoryCount(_round);
@@ -223,6 +224,9 @@ public class EnormousPanel extends MediaPanel
         _qsprite.addSpriteObserver(new PathAdapter() {
             public void pathCompleted (Sprite sprite, Path path, long when) {
                 removeSprite(sprite);
+                if (_qsprites.size() == 0) {
+                    endRound();
+                }
             }
         });
         _qsprite.move(new LinePath(new Point(getWidth(), 100 + 2*GAP), 500L));
@@ -268,6 +272,21 @@ public class EnormousPanel extends MediaPanel
             revalidate();
             repaint();
         }
+    }
+
+    public void endRound ()
+    {
+        // slide a giant "end of round" sprite over the whole board
+        int width = getWidth() - 2*GAP;
+        int height = getHeight() - FOOTER - 3*GAP;
+        SausageSprite rsprite = new SausageSprite(
+            width, height, "End of round " + (_round+1),
+            EnormousConfig.questionFont,
+            EnormousConfig.questionColor, "next_round");
+        rsprite.setRenderOrder(25);
+        rsprite.setLocation(-width, GAP);
+        rsprite.move(new LinePath(new Point(GAP, GAP), 500L));
+        addSprite(rsprite);
     }
 
     // documentation inherited from interface ControllerProvider

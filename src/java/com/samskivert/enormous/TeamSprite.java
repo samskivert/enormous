@@ -44,9 +44,9 @@ public class TeamSprite extends SausageSprite
         }
     }
 
-    public void addStars (int stars)
+    public void setStars (int stars)
     {
-        _stars += stars;
+        _stars = stars;
         invalidate();
     }
 

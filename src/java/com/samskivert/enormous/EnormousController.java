@@ -20,18 +20,19 @@ public class EnormousController extends Controller
         _panel = panel;
 
         // create our team arrays
-        _teams = new PlayerList[EnormousConfig.getTeamCount()];
+        _teams = new Team[EnormousConfig.getTeamCount()];
         for (int ii = 0; ii < _teams.length; ii++) {
-            _teams[ii] = new PlayerList();
+            _teams[ii] = new Team();
         }
-        _active = new Player[_teams.length];
     }
 
     public void setActivePlayer (int teamIndex, String name)
     {
+        Team team = _teams[teamIndex];
+
         // check for an existing player record
         Player active = null;
-        for (Player p : _teams[teamIndex]) {
+        for (Player p : team.players) {
             if (p.name.equalsIgnoreCase(name)) {
                 active = p;
                 break;
@@ -39,28 +40,39 @@ public class EnormousController extends Controller
         }
         if (active == null) {
             active = new Player(teamIndex, name);
-            _teams[teamIndex].add(active);
+            team.players.add(active);
         }
-        _active[teamIndex] = active;
+        team.active = active;
         active.score = 0;
         _panel.getTeamSprite(teamIndex).setPlayer(active);
         _panel.clearTeamConfig();
     }
 
+    public void configureTeams (TeamSprite[] sprites)
+    {
+        for (int ii = 0; ii < _teams.length; ii++) {
+            if (_teams[ii].active != null) {
+                sprites[ii].setPlayer(_teams[ii].active);
+            }
+            sprites[ii].setStars(_teams[ii].stars);
+        }
+    }
+
     public void cashInPoints (int teamIndex)
     {
-        Player active = _active[teamIndex];
-        if (active == null) {
+        Team team = _teams[teamIndex];
+        if (team.active == null) {
             return;
         }
-        if (active.score < 6) {
+        if (team.active.score < 6) {
             return;
         }
-        int stars = (active.score - 3) / 3;
-        active.score = active.score % 3;
-        active.stars += stars;
-        _panel.getTeamSprite(teamIndex).setPlayer(active);
-        _panel.getTeamSprite(teamIndex).addStars(stars);
+        int stars = (team.active.score - 3) / 3;
+        team.active.score = team.active.score % 3;
+        team.active.stars += stars;
+        team.stars += stars;
+        _panel.getTeamSprite(teamIndex).setPlayer(team.active);
+        _panel.getTeamSprite(teamIndex).setStars(team.stars);
     }
 
     /**
@@ -70,11 +82,12 @@ public class EnormousController extends Controller
     {
         // ignore subsequent "clicks" while we've got an active responder
         if (_responder != -1) {
-            System.err.println(_active[_responder] + " is already responding.");
+            System.err.println(_teams[_responder].active +
+                               " is already responding.");
             return;
         }
 
-        if (_active[teamIndex] == null) {
+        if (_teams[teamIndex].active == null) {
             System.err.println("No active player! [tidx=" + teamIndex + "].");
             return;
         }
@@ -89,7 +102,7 @@ public class EnormousController extends Controller
      */
     public void answerWasCorrect (int round, int catidx, int qidx)
     {
-        if (_responder == -1 || _active[_responder] == null) {
+        if (_responder == -1 || _teams[_responder].active == null) {
             System.err.println("No active responder.");
             return;
         }
@@ -99,8 +112,9 @@ public class EnormousController extends Controller
         new Interval(EnormousApp.queue) {
             public void expired () {
                 // score points for the active player
-                _active[_responder].score += points;
-                _panel.getTeamSprite(_responder).setPlayer(_active[_responder]);
+                _teams[_responder].active.score += points;
+                _panel.getTeamSprite(_responder).setPlayer(
+                    _teams[_responder].active);
                 _responder = -1;
                 _panel.dismissQuestion(true);
             }
@@ -112,7 +126,7 @@ public class EnormousController extends Controller
      */
     public void answerWasIncorrect (int round, int catidx, int qidx)
     {
-        if (_responder == -1 || _active[_responder] == null) {
+        if (_responder == -1 || _teams[_responder].active == null) {
             System.err.println("No active responder.");
             return;
         }
@@ -122,8 +136,9 @@ public class EnormousController extends Controller
         new Interval(EnormousApp.queue) {
             public void expired () {
                 // deduct points for the active player
-                _active[_responder].score -= points;
-                _panel.getTeamSprite(_responder).setPlayer(_active[_responder]);
+                _teams[_responder].active.score -= points;
+                _panel.getTeamSprite(_responder).setPlayer(
+                    _teams[_responder].active);
                 _responder = -1;
                 _panel.showAllTeams();
                 _panel.restoreQuestion();
@@ -161,11 +176,14 @@ public class EnormousController extends Controller
                 if ((action.getModifiers() & ActionEvent.SHIFT_MASK) != 0) {
                     cashInPoints(tidx);
                 } else {
-                    _panel.showTeamConfig(tidx, _active[tidx]);
+                    _panel.showTeamConfig(tidx, _teams[tidx].active);
                 }
             } catch (Exception e) {
                 e.printStackTrace(System.err);
             }
+
+        } else if (cmd.equals("next_round")) {
+            _panel.setRound(_panel._round+1);
 
         } else if (cmd.equals("dismiss")) {
             _panel.dismissQuestion(false);
@@ -177,12 +195,14 @@ public class EnormousController extends Controller
         return true;
     }
 
-    protected static class PlayerList extends ArrayList<Player>
+    protected static class Team
     {
+        public int stars;
+        public Player active;
+        public ArrayList<Player> players = new ArrayList<Player>();
     }
 
     protected EnormousPanel _panel;
-    protected PlayerList[] _teams;
-    protected Player[] _active;
+    protected Team[] _teams;
     protected int _responder = -1;
 }
