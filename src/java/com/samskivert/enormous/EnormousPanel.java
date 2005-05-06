@@ -17,7 +17,6 @@ import java.util.HashMap;
 
 import com.samskivert.swing.Controller;
 import com.samskivert.swing.ControllerProvider;
-import com.samskivert.util.Interval;
 
 import com.threerings.media.FrameManager;
 import com.threerings.media.MediaPanel;
@@ -45,7 +44,8 @@ public class EnormousPanel extends MediaPanel
         super.doLayout();
 
         // start the first round if appropriate
-        if (_round == 0) {
+        if (_round == -1) {
+            _round = 0;
             // queue up an event to start round one when the AWT is done
             // with its initialization business
             EventQueue.invokeLater(new Runnable() {
@@ -151,6 +151,11 @@ public class EnormousPanel extends MediaPanel
      */
     public void displayQuestion (int catidx, int qidx)
     {
+        // no go if we're display a team configuration currently
+        if (_tconfig != null) {
+            return;
+        }
+
         // dismiss any existing question
         if (_qsprite != null) {
             dismissQuestion();
@@ -183,6 +188,14 @@ public class EnormousPanel extends MediaPanel
         addSprite(_qsprite);
     }
 
+    public void restoreQuestion ()
+    {
+        if (_acidx != -1) {
+            _qsprite.setText(
+                EnormousConfig.getQuestion(_round, _acidx, _aqidx));
+        }
+    }
+
     /**
      * Dismisses the currently displayed question.
      */
@@ -197,7 +210,7 @@ public class EnormousPanel extends MediaPanel
 
         // clear the active question and player
         _acidx = _aqidx = -1;
-        clearActivePlayer();
+        showAllTeams();
 
         if (_qsprite == null) {
             return;
@@ -209,6 +222,47 @@ public class EnormousPanel extends MediaPanel
         });
         _qsprite.move(new LinePath(new Point(getWidth(), 100 + 2*GAP), 500L));
         _qsprite = null;
+    }
+
+    public void highlightTeam (int teamIdx)
+    {
+        for (int ii = 0; ii < _tsprites.length; ii++) {
+            if (teamIdx != ii) {
+                removeSprite(_tsprites[ii]);
+            }
+        }
+    }
+
+    public void showAllTeams ()
+    {
+        for (int ii = 0; ii < _tsprites.length; ii++) {
+            if (!isManaged(_tsprites[ii])) {
+                addSprite(_tsprites[ii]);
+            }
+        }
+    }
+
+    public void showTeamConfig (int teamIdx, Player active)
+    {
+        if (_tconfig == null && _qsprite == null) {
+            removeSprite(_tsprites[teamIdx]);
+            _tconfig = new TeamConfigDialog(_ctrl, teamIdx, active);
+            _tconfig.setBounds(_tsprites[teamIdx].getBounds());
+            EnormousApp.frame.getLayeredPane().add(_tconfig);
+            _tconfig.setVisible(true);
+        }
+    }
+
+    public void clearTeamConfig ()
+    {
+        if (_tconfig != null) {
+            EnormousApp.frame.getLayeredPane().remove(_tconfig);
+            EnormousApp.frame.requestFocus();
+            _tconfig = null;
+            showAllTeams();
+            revalidate();
+            repaint();
+        }
     }
 
     // documentation inherited from interface ControllerProvider
@@ -231,36 +285,18 @@ public class EnormousPanel extends MediaPanel
         if (_qsprite != null) {
             char key = e.getKeyChar();
             if (key == 'y') {
-                _qsprite.setText("Correct!");
-                new Interval(EnormousApp.queue) {
-                    public void expired () {
-                        dismissQuestion();
-                    }
-                }.schedule(1000l);
+                _ctrl.answerWasCorrect();
 
             } else if (key == 'n') {
-                _qsprite.setText("Bzzzzzt!");
-                new Interval(EnormousApp.queue) {
-                    public void expired () {
-                        clearActivePlayer();
-                        if (_acidx != -1) {
-                            _qsprite.setText(EnormousConfig.getQuestion(
-                                                 _round, _acidx, _aqidx));
-                        }
-                    }
-                }.schedule(1000l);
+                _ctrl.answerWasIncorrect();
 
             } else if (key == 'c') {
-                clearActivePlayer();
-                if (_acidx != -1) {
-                    _qsprite.setText(EnormousConfig.getQuestion(
-                                         _round, _acidx, _aqidx));
-                }
+                _ctrl.answerWasCanceled();
 
-            } else if (key >= '1' && key <= '9' && _apidx == -1) {
+            } else if (key >= '1' && key <= '9') {
                 int pidx = key - '1';
                 if (pidx >= 0 && pidx < _tsprites.length) {
-                    handlePlayerResponse(pidx);
+                    _ctrl.playerResponded(pidx);
                 }
             }
         }
@@ -286,34 +322,8 @@ public class EnormousPanel extends MediaPanel
         gfx.fill(dirtyRect);
     }
 
-    protected void handlePlayerResponse (int pidx)
-    {
-        // note that this player is the "active" player
-        _apidx = pidx;
-
-        // show only the active player's team display
-        for (int ii = 0; ii < _tsprites.length; ii++) {
-            if (_apidx != ii) {
-                removeSprite(_tsprites[ii]);
-            }
-        }
-
-        // let the controller know
-        _ctrl.playerResponded(pidx);
-    }
-
-    protected void clearActivePlayer ()
-    {
-        _apidx = -1;
-        for (int ii = 0; ii < _tsprites.length; ii++) {
-            if (!isManaged(_tsprites[ii])) {
-                addSprite(_tsprites[ii]);
-            }
-        }
-    }
-
     protected EnormousController _ctrl;
-    protected int _round;
+    protected int _round = -1;
 
     protected SausageSprite[] _catsprites;
     protected HashMap<Integer,SausageSprite> _qsprites =
@@ -321,7 +331,9 @@ public class EnormousPanel extends MediaPanel
     protected TeamSprite[] _tsprites;
 
     protected SausageSprite _qsprite;
-    protected int _acidx = -1, _aqidx = -1, _apidx = -1;
+    protected int _acidx = -1, _aqidx = -1;
+
+    protected TeamConfigDialog _tconfig;
 
     protected static final int HEADER = 100;
     protected static final int FOOTER = 100;

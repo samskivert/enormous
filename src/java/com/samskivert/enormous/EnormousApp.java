@@ -3,6 +3,7 @@
 
 package com.samskivert.enormous;
 
+import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import javax.swing.JFrame;
 
@@ -25,14 +26,16 @@ public class EnormousApp
         }
     };
 
+    public static JFrame frame;
+
     public static void main (String[] args)
     {
         // create and display the interface
-        JFrame frame = new JFrame("That's ENORMOUS");
+        frame = new JFrame("That's ENORMOUS");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         FrameManager fmgr = FrameManager.newInstance(frame);
         EnormousPanel panel = new EnormousPanel(fmgr);
-        frame.setContentPane(panel);
+        frame.getContentPane().add(panel, BorderLayout.CENTER);
         frame.pack();
         EnormousConfig.init(frame.getWidth(), frame.getHeight());
         SwingUtil.centerWindow(frame);

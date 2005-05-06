@@ -50,12 +50,19 @@ public class TeamSprite extends SausageSprite
         invalidate();
     }
 
+    public int getTeamStars ()
+    {
+        return _stars;
+    }
+
     public void setPlayer (Player player)
     {
         _player = player;
         _plabel.setText(player.name + ": " + player.score);
-        layoutLabel();
-        invalidate();
+        if (_mgr != null) {
+            layoutLabel();
+            invalidate();
+        }
     }
 
     // documentation inherited

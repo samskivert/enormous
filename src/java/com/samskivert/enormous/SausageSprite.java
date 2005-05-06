@@ -52,8 +52,10 @@ public class SausageSprite extends Sprite
     public void setText (String text)
     {
         _label.setText(text);
-        layoutLabel();
-        invalidate();
+        if (_mgr != null) {
+            layoutLabel();
+            invalidate();
+        }
     }
 
     // documentation inherited from interface ActionSprite
