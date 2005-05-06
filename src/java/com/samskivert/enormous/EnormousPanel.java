@@ -155,14 +155,15 @@ public class EnormousPanel extends MediaPanel
             }
         }
 
-        int width = getWidth() - 2*GAP, height = getHeight() - 250 - GAP;
+        int width = getWidth() - 2*GAP;
+        int height = getHeight() - HEADER - FOOTER - 4*GAP;
         String qtext = EnormousConfig.getQuestion(_round, catidx, qidx);
         _qsprite = new SausageSprite(
             width, height, qtext, EnormousConfig.questionFont,
             EnormousConfig.questionColor, "dismiss");
         _qsprite.setRenderOrder(25);
-        _qsprite.setLocation(-width, 100 + 2*GAP);
-        _qsprite.move(new LinePath(new Point(GAP, 100 + 2*GAP), 500L));
+        _qsprite.setLocation(-width, HEADER + 2*GAP);
+        _qsprite.move(new LinePath(new Point(GAP, HEADER + 2*GAP), 500L));
         addSprite(_qsprite);
     }
 

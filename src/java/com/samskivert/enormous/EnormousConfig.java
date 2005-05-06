@@ -14,7 +14,7 @@ import com.samskivert.util.Config;
 public class EnormousConfig
 {
     /** Provides access to configuration data. */
-    public static Config config = new Config("enormous");
+    public static Config config = new Config("rsrc/enormous");
 
     /** The font used to display category selection text. */
     public static Font categoryFont;
@@ -52,7 +52,7 @@ public class EnormousConfig
      */
     public static int getTeamCount ()
     {
-        return 3;
+        return config.getValue("team_count", 3);
     }
 
     /**
@@ -60,12 +60,7 @@ public class EnormousConfig
      */
     public static String getTeamName (int teamIdx)
     {
-        switch (teamIdx) {
-        case 0: return "Red";
-        case 1: return "White";
-        case 2: return "Blue";
-        }
-        return "???";
+        return config.getValue("team_name." + teamIdx, "team_" + teamIdx);
     }
 
     /**
@@ -86,7 +81,7 @@ public class EnormousConfig
      */
     public static int getCategoryCount (int round)
     {
-        return 5;
+        return config.getValue("category_count", 5);
     }
 
     /**
@@ -95,7 +90,7 @@ public class EnormousConfig
      */
     public static int getQuestionCount (int round)
     {
-        return 4;
+        return config.getValue("question_count", 4);
     }
 
     /**
@@ -103,14 +98,8 @@ public class EnormousConfig
      */
     public static String getCategory (int round, int index)
     {
-        switch (index) {
-        case 0: return "American History";
-        case 1: return "Farmyard Fun";
-        case 2: return "Famous Bald People";
-        case 3: return "Huns Across America";
-        case 4: return "Art Haus";
-        }
-        return "category:" + round + ":" + index;
+        return config.getValue("category_name." + round + "." + index,
+                               "category." + round + "." + index);
     }
 
     /**
@@ -118,13 +107,8 @@ public class EnormousConfig
      */
     public static String getQuestionName (int round, int catidx, int questidx)
     {
-        switch (questidx) {
-        case 0: return "Small";
-        case 1: return "Medium";
-        case 2: return "Large";
-        case 3: return "ENORMOUS!";
-        }
-        return "???";
+        return config.getValue("question_name." + questidx,
+                               "question." + questidx);
     }
 
     /**
@@ -140,6 +124,8 @@ public class EnormousConfig
      */
     public static String getQuestion (int round, int catidx, int questidx)
     {
-        return "What is the airspeed velocity of an unladen swallow?";
+        String key = "question." + round + "." + catidx + "." + questidx;
+        String def = "What is the airspeed velocity of an unladen swallow?";
+        return config.getValue(key, def);
     }
 }
