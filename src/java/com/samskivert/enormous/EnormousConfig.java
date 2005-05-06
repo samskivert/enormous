@@ -22,19 +22,63 @@ public class EnormousConfig
     /** The font used to display question text. */
     public static Font questionFont;
 
+    /** The font used to display the team display. */
+    public static Font teamFont;
+
+    /** The background of the whole screen. */
+    public static Color backgroundColor = Color.blue;
+
     /** The background of the categories on the main display. */
-    public static Color categoryColor = new Color(0x003366);
+    public static Color categoryColor = Color.red;
 
     /** The background of the questions on the main display. */
-    public static Color questionColor = new Color(0xFF9900);
+    public static Color questionColor = new Color(0x99CC66);
+
+    /** The background of the questions on the main display. */
+    public static Color seenQuestionColor = new Color(0x336600);
 
     /**
      * Configures our various bits based on the size of the screen.
      */
     public static void init (int width, int height)
     {
-        int catsize = 18;
-        categoryFont = new Font("Helvetica", Font.BOLD, catsize);
+        categoryFont = new Font("Helvetica", Font.BOLD, 18);
+        questionFont = new Font("Helvetica", Font.BOLD, 48);
+        teamFont = new Font("Helvetica", Font.BOLD, 18);
+    }
+
+    /**
+     * Returns the number of teams.
+     */
+    public static int getTeamCount ()
+    {
+        return 3;
+    }
+
+    /**
+     * Returns the name of the specified time.
+     */
+    public static String getTeamName (int teamIdx)
+    {
+        switch (teamIdx) {
+        case 0: return "Red";
+        case 1: return "White";
+        case 2: return "Blue";
+        }
+        return "???";
+    }
+
+    /**
+     * Returns the background color for the specified team.
+     */
+    public static Color getTeamColor (int teamIdx)
+    {
+        switch (teamIdx) {
+        case 0: return Color.red;
+        case 1: return Color.white;
+        case 2: return Color.blue;
+        }
+        return Color.black;
     }
 
     /**

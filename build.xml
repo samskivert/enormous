@@ -35,7 +35,7 @@
   <!-- build the java class files -->
   <target name="compile" depends="prepare">
     <javac srcdir="${src.dir}" destdir="${classes.dir}"
-           debug="on" optimize="on" deprecation="on" source="1.4">
+           debug="on" optimize="on" deprecation="on">
       <classpath refid="classpath"/>
     </javac>
   </target>
