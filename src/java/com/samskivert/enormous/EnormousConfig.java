@@ -120,6 +120,21 @@ public class EnormousConfig
     }
 
     /**
+     * Returns the score for the specified question.
+     */
+    public static int getQuestionScore (int round, int catidx, int questidx)
+    {
+        // look for a custom score for this question
+        int score = config.getValue("question_score." + round + "." +
+                                    catidx + "." + questidx, -1);
+        if (score == -1) {
+            // fall back to the default score for a question of this size
+            score = config.getValue("question_score." + questidx, 1);
+        }
+        return score;
+    }
+
+    /**
      * Returns the text of the specified question.
      */
     public static String getQuestion (int round, int catidx, int questidx)

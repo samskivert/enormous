@@ -70,18 +70,19 @@ public class EnormousController extends Controller
     /**
      * Called when the MC clicks 'y' after a player has responded.
      */
-    public void answerWasCorrect ()
+    public void answerWasCorrect (int round, int catidx, int qidx)
     {
         if (_responder == -1 || _active[_responder] == null) {
             System.err.println("No active responder.");
             return;
         }
 
+        final int points = EnormousConfig.getQuestionScore(round, catidx, qidx);
         _panel.getQuestionSprite().setText("Correct!");
         new Interval(EnormousApp.queue) {
             public void expired () {
-                // score a point for the active player
-                _active[_responder].score++;
+                // score points for the active player
+                _active[_responder].score += points;
                 _panel.getTeamSprite(_responder).setPlayer(_active[_responder]);
                 _responder = -1;
                 _panel.dismissQuestion();
@@ -92,18 +93,19 @@ public class EnormousController extends Controller
     /**
      * Called when the MC clicks 'n' after a player has responded.
      */
-    public void answerWasIncorrect ()
+    public void answerWasIncorrect (int round, int catidx, int qidx)
     {
         if (_responder == -1 || _active[_responder] == null) {
             System.err.println("No active responder.");
             return;
         }
 
+        final int points = EnormousConfig.getQuestionScore(round, catidx, qidx);
         _panel.getQuestionSprite().setText("Bzzzzzt!");
         new Interval(EnormousApp.queue) {
             public void expired () {
-                // score lose points for the active player
-                _active[_responder].score--;
+                // deduct points for the active player
+                _active[_responder].score -= points;
                 _panel.getTeamSprite(_responder).setPlayer(_active[_responder]);
                 _responder = -1;
                 _panel.showAllTeams();

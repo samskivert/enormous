@@ -285,10 +285,10 @@ public class EnormousPanel extends MediaPanel
         if (_qsprite != null) {
             char key = e.getKeyChar();
             if (key == 'y') {
-                _ctrl.answerWasCorrect();
+                _ctrl.answerWasCorrect(_round, _acidx, _aqidx);
 
             } else if (key == 'n') {
-                _ctrl.answerWasIncorrect();
+                _ctrl.answerWasIncorrect(_round, _acidx, _aqidx);
 
             } else if (key == 'c') {
                 _ctrl.answerWasCanceled();
