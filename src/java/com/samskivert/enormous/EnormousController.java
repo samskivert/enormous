@@ -102,7 +102,7 @@ public class EnormousController extends Controller
                 _active[_responder].score += points;
                 _panel.getTeamSprite(_responder).setPlayer(_active[_responder]);
                 _responder = -1;
-                _panel.dismissQuestion();
+                _panel.dismissQuestion(true);
             }
         }.schedule(1000l);
     }
@@ -168,7 +168,7 @@ public class EnormousController extends Controller
             }
 
         } else if (cmd.equals("dismiss")) {
-            _panel.dismissQuestion();
+            _panel.dismissQuestion(false);
 
         } else {
             return super.handleAction(action);

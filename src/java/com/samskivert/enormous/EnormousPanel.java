@@ -158,7 +158,7 @@ public class EnormousPanel extends MediaPanel
 
         // dismiss any existing question
         if (_qsprite != null) {
-            dismissQuestion();
+            dismissQuestion(false);
         }
 
         // note that this is the active question
@@ -199,13 +199,18 @@ public class EnormousPanel extends MediaPanel
     /**
      * Dismisses the currently displayed question.
      */
-    public void dismissQuestion ()
+    public void dismissQuestion (boolean remove)
     {
         // reenable the category titles
         for (int ii = 0; ii < _catsprites.length; ii++) {
             if (!isManaged(_catsprites[ii])) {
                 addSprite(_catsprites[ii]);
             }
+        }
+
+        // if we are to remove the original question, do so now
+        if (remove && _acidx != -1 && _aqidx != -1) {
+            removeSprite(_qsprites.remove(_acidx * 10 + _aqidx));
         }
 
         // clear the active question and player
