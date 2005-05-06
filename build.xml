@@ -45,4 +45,11 @@
     <jar destfile="${deploy.dir}/${dist.jar}"
          basedir="${classes.dir}"/>
   </target>
+
+  <!-- optimizes, combines and removes dead code -->
+  <target name="proguard" depends="dist">
+    <taskdef resource="proguard/ant/task.properties"
+             classpath="lib/proguard.jar"/>
+    <proguard configuration="etc/${app.name}.pro"/>
+  </target>
 </project>
