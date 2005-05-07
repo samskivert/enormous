@@ -8,6 +8,7 @@
 -injars lib/narya-base.jar(!META-INF/*,!**/tools/**)
 -injars lib/narya-media.jar(!META-INF/*,!**/tools/**)
 
+-libraryjars lib/javalayer.jar
 -libraryjars <java.home>/lib/rt.jar
 
 -outjars dist/enormous-pro.jar
