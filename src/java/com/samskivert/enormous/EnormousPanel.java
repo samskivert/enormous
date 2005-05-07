@@ -156,6 +156,22 @@ public class EnormousPanel extends MediaPanel
     }
 
     /**
+     * Displays the specified alarm.
+     */
+    public void displayAlarm (String text, String command)
+    {
+        int width = getWidth() - 2*GAP;
+        int height = getHeight() - HEADER - FOOTER - 4*GAP;
+        _qsprite = new SausageSprite(
+            width, height, text, EnormousConfig.questionFont,
+            EnormousConfig.questionColor, command);
+        _qsprite.setRenderOrder(25);
+        _qsprite.setLocation(-width, HEADER + 2*GAP);
+        _qsprite.move(new LinePath(new Point(GAP, HEADER + 2*GAP), 500L));
+        addSprite(_qsprite);
+    }
+
+    /**
      * Displays the specified question.
      */
     public void displayQuestion (int catidx, int qidx)

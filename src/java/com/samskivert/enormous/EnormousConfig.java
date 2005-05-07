@@ -56,7 +56,7 @@ public class EnormousConfig
         } catch (IOException ioe) {
             System.err.println("Error loading '" + path + "': " + ioe);
         }
-        config = new Config("rsrc/enormous", props);
+        config = new Config("enormous", props);
     }
 
     /**
@@ -201,5 +201,38 @@ public class EnormousConfig
         String key = "question." + round + "." + catidx + "." + questidx;
         String def = "What is the airspeed velocity of an unladen swallow?";
         return config.getValue(key, def);
+    }
+
+    /**
+     * Returns the number of times out of 100 that an alarm should go off.
+     */
+    public static int getAlarmFrequency ()
+    {
+        return config.getValue("alarm_freq", 15);
+    }
+
+    /**
+     * Returns the number of different alarms that are available.
+     */
+    public static int[] getAlarmWeights ()
+    {
+        return config.getValue("alarm_weights", new int[0]);
+    }
+
+    /**
+     * Returns the number of different alarms that are available.
+     */
+    public static String getAlarmText (int alarm)
+    {
+        return config.getValue("alarm_text." + alarm, "Food Fight!");
+    }
+
+    /**
+     * Returns the number of bonus points associated with the question
+     * following the alarm, if any.
+     */
+    public static int getAlarmBonus (int alarm)
+    {
+        return config.getValue("alarm_bonus." + alarm, 0);
     }
 }

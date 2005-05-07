@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 
 import com.samskivert.swing.Controller;
+import com.threerings.util.RandomUtil;
 import com.samskivert.util.Interval;
 import com.samskivert.util.StringUtil;
 
@@ -109,7 +110,8 @@ public class EnormousController extends Controller
         final int responder = _responder;
         _responder = -1;
 
-        final int points = EnormousConfig.getQuestionScore(round, catidx, qidx);
+        final int points = _bonus +
+            EnormousConfig.getQuestionScore(round, catidx, qidx);
         _panel.replaceQuestion("Correct!");
         new Interval(EnormousApp.queue) {
             public void expired () {
@@ -163,12 +165,36 @@ public class EnormousController extends Controller
         String cmd = action.getActionCommand();
         if (cmd.startsWith("question:")) {
             String[] bits = StringUtil.split(cmd, ":");
-            try {
-                int catidx = Integer.parseInt(bits[1]);
-                int qidx = Integer.parseInt(bits[2]);
-                _panel.displayQuestion(catidx, qidx);
-            } catch (Exception e) {
-                e.printStackTrace(System.err);
+
+            // clear out any unclaimed bonus
+            if (bits.length == 3) {
+                _bonus = 0;
+            }
+
+            // randomly during a round, we pop up a special alarm instead
+            // of immediately going to a new question
+            int[] aweights = EnormousConfig.getAlarmWeights();
+            if (bits.length == 3 && aweights.length > 0 && _questions > 1 &&
+                RandomUtil.getInt(100) < EnormousConfig.getAlarmFrequency()) {
+                int aidx = RandomUtil.getWeightedIndex(aweights);
+                String text = EnormousConfig.getAlarmText(aidx);
+                _bonus = EnormousConfig.getAlarmBonus(aidx);
+                if (_bonus > 0) {
+                    text += "\nNext question bonus: " + _bonus;
+                }
+                String acmd = (_bonus > 0) ? (cmd + ":noalarm") : "dismiss";
+                _panel.displayAlarm(text, acmd);
+                _questions = 0;
+
+            } else {
+                try {
+                    int catidx = Integer.parseInt(bits[1]);
+                    int qidx = Integer.parseInt(bits[2]);
+                    _panel.displayQuestion(catidx, qidx);
+                    _questions++;
+                } catch (Exception e) {
+                    e.printStackTrace(System.err);
+                }
             }
 
         } else if (cmd.startsWith("team:")) {
@@ -191,6 +217,7 @@ public class EnormousController extends Controller
 
         } else if (cmd.equals("next_round")) {
             _panel.setRound(_panel._round+1);
+            _questions = 0;
 
         } else if (cmd.equals("dismiss")) {
             _panel.dismissQuestion(false);
@@ -212,4 +239,6 @@ public class EnormousController extends Controller
     protected EnormousPanel _panel;
     protected Team[] _teams;
     protected int _responder = -1;
+    protected int _questions = 0;
+    protected int _bonus;
 }
