@@ -3,8 +3,10 @@
 
 package com.samskivert.enormous;
 
+import java.applet.AudioClip;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import com.samskivert.swing.Controller;
 import com.threerings.util.RandomUtil;
@@ -24,6 +26,22 @@ public class EnormousController extends Controller
         _teams = new Team[EnormousConfig.getTeamCount()];
         for (int ii = 0; ii < _teams.length; ii++) {
             _teams[ii] = new Team();
+        }
+
+        // load up our team sounds
+        for (int ii = 0; ii < _teams.length; ii++) {
+            loadSound("team_sound." + ii);
+        }
+
+        loadSound("cash_in");
+        loadSound("correct");
+        loadSound("incorrect");
+        loadSound("enorm_correct");
+        loadSound("enorm_incorrect");
+
+        int[] aweights = EnormousConfig.getAlarmWeights();
+        for (int ii = 0; ii < aweights.length; ii++) {
+            loadSound("alarm_sound." + ii);
         }
     }
 
@@ -72,6 +90,9 @@ public class EnormousController extends Controller
         if (team.active.score < 6) {
             return;
         }
+
+        playSound("cash_in");
+
         int stars = (team.active.score - 3) / 3;
         team.active.score = team.active.score % 3;
         team.active.stars += stars;
@@ -97,6 +118,9 @@ public class EnormousController extends Controller
             return;
         }
 
+        // play the sound associated with this team
+        playSound("team_sound." + teamIndex);
+
         // highlight only this team in the display
         _responder = teamIndex;
         _panel.highlightTeam(_responder);
@@ -115,6 +139,8 @@ public class EnormousController extends Controller
         _responder = -1;
 
         int qscore = EnormousConfig.getQuestionScore(round, catidx, qidx);
+        playSound(qscore > 3 ? "enorm_correct" : "correct");
+
         final int points = qscore + _bonus;
         _panel.replaceQuestion(qscore > 3 ? "That's ENORMOUS!" : "Correct!");
         new Interval(EnormousApp.queue) {
@@ -141,6 +167,8 @@ public class EnormousController extends Controller
         _responder = -1;
 
         final int points = EnormousConfig.getQuestionScore(round, catidx, qidx);
+        playSound(points > 3 ? "enorm_incorrect" : "incorrect");
+
         _panel.replaceQuestion(
             points > 3 ? "That's ENORMOUSly wrong!" : "Bzzzzt!");
         new Interval(EnormousApp.queue) {
@@ -183,6 +211,7 @@ public class EnormousController extends Controller
             if (bits.length == 3 && aweights.length > 0 && _questions > 1 &&
                 RandomUtil.getInt(100) < EnormousConfig.getAlarmFrequency()) {
                 int aidx = RandomUtil.getWeightedIndex(aweights);
+                playSound("alarm_sound." + aidx);
                 String text = EnormousConfig.getAlarmText(aidx);
                 _bonus = EnormousConfig.getAlarmBonus(aidx);
                 if (_bonus > 0) {
@@ -235,8 +264,27 @@ public class EnormousController extends Controller
         return true;
     }
 
+    protected void loadSound (String name)
+    {
+        AudioClip clip = _panel.loadSound(EnormousConfig.getSound(name));
+        if (clip != null) {
+            _clips.put(name, clip);
+        } else {
+            System.err.println("No sound: " + name);
+        }
+    }
+
+    protected void playSound (String name)
+    {
+        AudioClip clip = _clips.get(name);
+        if (clip != null) {
+            clip.play();
+        }
+    }
+
     protected EnormousPanel _panel;
     protected Team[] _teams;
+    protected HashMap<String,AudioClip> _clips = new HashMap<String,AudioClip>();
     protected int _responder = -1;
     protected int _questions = 0;
     protected int _bonus;

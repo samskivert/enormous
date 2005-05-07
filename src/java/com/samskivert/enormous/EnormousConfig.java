@@ -122,6 +122,25 @@ public class EnormousConfig
     }
 
     /**
+     * Returns the sound file to be played when the specified team responds.
+     */
+    public static String getTeamSound (int teamIdx)
+    {
+        return config.getValue("team_sound." + teamIdx, "");
+    }
+
+    /**
+     * Returns the sound file of the specified type.
+     */
+    public static String getSound (String type)
+    {
+        if (type.indexOf("sound") == -1) {
+            type = type + "_sound";
+        }
+        return config.getValue(type, "");
+    }
+
+    /**
      * Returns the background color for the specified team.
      */
     public static Color getTeamColor (int teamIdx)

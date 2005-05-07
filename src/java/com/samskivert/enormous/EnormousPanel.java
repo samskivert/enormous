@@ -215,10 +215,8 @@ public class EnormousPanel extends MediaPanel
         String file = EnormousConfig.getQuestionFile(_round, catidx, qidx);
         if (file.endsWith("jpg") || file.endsWith("png")) {
             displayImage(file);
-        } else if (file.endsWith("wav")) {
+        } else if (file.endsWith("wav") || file.endsWith("mp3")) {
             playSound(file);
-        } else if (file.endsWith("mp3")) {
-            playMP3(file);
         } else if (!StringUtil.blank(file)) {
             System.err.println("Unknown file type '" + file + "'.");
         }
@@ -429,22 +427,20 @@ public class EnormousPanel extends MediaPanel
         }
     }
 
-    protected void playSound (String path)
+    protected AudioClip loadSound (String path)
     {
-        URL sound = EnormousConfig.getResource(path);
-        _aclip = Applet.newAudioClip(sound);
-        new Interval(EnormousApp.queue) {
-            public void expired () {
-                if (_aclip != null) {
-                    _aclip.play();
-                }
-            }
-        }.schedule(2000L);
+        if (path.endsWith("mp3")) {
+            return new MP3Player(EnormousConfig.getResourceAsStream(path));
+        } else if (path.endsWith("wav")) {
+            return Applet.newAudioClip(EnormousConfig.getResource(path));
+        } else {
+            return null;
+        }
     }
 
-    protected void playMP3 (String path)
+    protected void playSound (String path)
     {
-        _aclip = new MP3Player(EnormousConfig.getResourceAsStream(path));
+        _aclip = loadSound(path);
         new Interval(EnormousApp.queue) {
             public void expired () {
                 if (_aclip != null) {
