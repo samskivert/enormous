@@ -15,7 +15,11 @@ import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 
+import java.applet.Applet;
+import java.applet.AudioClip;
+
 import java.io.IOException;
+import java.net.URL;
 
 import java.util.HashMap;
 
@@ -214,8 +218,14 @@ public class EnormousPanel extends MediaPanel
             displayImage("rsrc/media/question." + _round + "." +
                          catidx + "." + qidx + ".jpg");
         } else if (type.equals("png")) {
-            displayImage("rsrc/media/question." + _round + "." +
-                         catidx + "." + qidx + ".png");
+
+        } else if (type.equals("mpg")) {
+            playSound("rsrc/media/question." + _round + "." +
+                      catidx + "." + qidx + ".mpg");
+
+        } else if (type.equals("wav")) {
+            playSound("rsrc/media/question." + _round + "." +
+                      catidx + "." + qidx + ".wav");
         }
     }
 
@@ -263,6 +273,12 @@ public class EnormousPanel extends MediaPanel
                 removeSprite(_isprite);
             }
             _isprite = null;
+        }
+
+        // if there is an audio clip playing, stop it
+        if (_aclip != null) {
+            _aclip.stop();
+            _aclip = null;
         }
 
         // clear the active question and player
@@ -411,12 +427,23 @@ public class EnormousPanel extends MediaPanel
                     int y = (getHeight() - _isprite.getBounds().height)/2;
                     _isprite.setLocation(x, y);
                 }
-            }.schedule(3000L);
+            }.schedule(2000L);
 
         } catch (IOException ioe) {
             System.err.println("Failed to load '" + path + "'.");
             ioe.printStackTrace(System.err);
         }
+    }
+
+    protected void playSound (String path)
+    {
+        URL sound = getClass().getClassLoader().getResource(path);
+        _aclip = Applet.newAudioClip(sound);
+        new Interval(EnormousApp.queue) {
+            public void expired () {
+                _aclip.play();
+            }
+        }.schedule(2000L);
     }
 
     protected EnormousController _ctrl;
@@ -431,6 +458,7 @@ public class EnormousPanel extends MediaPanel
     protected int _acidx = -1, _aqidx = -1;
 
     protected ImageSprite _isprite;
+    protected AudioClip _aclip;
     protected TeamConfigDialog _tconfig;
 
     protected static final int HEADER = 100;
