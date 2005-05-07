@@ -127,7 +127,7 @@ public class EnormousPanel extends MediaPanel
                 removeSprite(sprite);
             }
         });
-        _rsprite.move(new LinePath(new Point(getWidth(), GAP), 500L));
+        _rsprite.move(new LinePath(new Point(GAP, -getHeight()), 500L));
         _rsprite = null;
     }
 
@@ -345,7 +345,7 @@ public class EnormousPanel extends MediaPanel
             width, height, _ctrl._teams, _round,
             EnormousConfig.questionFont, EnormousConfig.questionColor);
         _rsprite.setRenderOrder(25);
-        _rsprite.setLocation(-width, GAP);
+        _rsprite.setLocation(GAP, -height);
         _rsprite.move(new LinePath(new Point(GAP, GAP), 500L));
         addSprite(_rsprite);
     }
