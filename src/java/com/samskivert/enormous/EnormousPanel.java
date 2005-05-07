@@ -12,14 +12,21 @@ import java.awt.Rectangle;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+
+import java.io.IOException;
 
 import java.util.HashMap;
 
 import com.samskivert.swing.Controller;
 import com.samskivert.swing.ControllerProvider;
+import com.samskivert.util.Interval;
 
 import com.threerings.media.FrameManager;
 import com.threerings.media.MediaPanel;
+import com.threerings.media.image.BufferedMirage;
+import com.threerings.media.sprite.ImageSprite;
 import com.threerings.media.sprite.PathAdapter;
 import com.threerings.media.sprite.Sprite;
 import com.threerings.media.util.LinePath;
@@ -201,6 +208,24 @@ public class EnormousPanel extends MediaPanel
         _qsprite.setLocation(-width, HEADER + 2*GAP);
         _qsprite.move(new LinePath(new Point(GAP, HEADER + 2*GAP), 500L));
         addSprite(_qsprite);
+
+        String type = EnormousConfig.getQuestionType(_round, catidx, qidx);
+        if (type.equals("jpg")) {
+            displayImage("rsrc/media/question." + _round + "." +
+                         catidx + "." + qidx + ".jpg");
+        } else if (type.equals("png")) {
+            displayImage("rsrc/media/question." + _round + "." +
+                         catidx + "." + qidx + ".png");
+        }
+    }
+
+    public void replaceQuestion (String text)
+    {
+        _qsprite.setText(text);
+        if (_isprite != null) {
+            // temporarily remove the image sprite
+            removeSprite(_isprite);
+        }
     }
 
     public void restoreQuestion ()
@@ -208,6 +233,10 @@ public class EnormousPanel extends MediaPanel
         if (_acidx != -1) {
             _qsprite.setText(
                 EnormousConfig.getQuestion(_round, _acidx, _aqidx));
+        }
+        if (_isprite != null && !isManaged(_isprite)) {
+            // restore the image sprite
+            addSprite(_isprite);
         }
     }
 
@@ -226,6 +255,14 @@ public class EnormousPanel extends MediaPanel
         // if we are to remove the original question, do so now
         if (remove && _acidx != -1 && _aqidx != -1) {
             removeSprite(_qsprites.remove(_acidx * 10 + _aqidx));
+        }
+
+        // if there is an image visible, dismiss that
+        if (_isprite != null) {
+            if (isManaged(_isprite)) {
+                removeSprite(_isprite);
+            }
+            _isprite = null;
         }
 
         // clear the active question and player
@@ -360,6 +397,28 @@ public class EnormousPanel extends MediaPanel
         gfx.fill(dirtyRect);
     }
 
+    protected void displayImage (String path)
+    {
+        try {
+            BufferedImage image = ImageIO.read(
+                getClass().getClassLoader().getResourceAsStream(path));
+            _isprite = new ImageSprite(new BufferedMirage(image));
+            _isprite.setRenderOrder(50);
+            new Interval(EnormousApp.queue) {
+                public void expired () {
+                    addSprite(_isprite);
+                    int x = (getWidth() - _isprite.getBounds().width)/2;
+                    int y = (getHeight() - _isprite.getBounds().height)/2;
+                    _isprite.setLocation(x, y);
+                }
+            }.schedule(3000L);
+
+        } catch (IOException ioe) {
+            System.err.println("Failed to load '" + path + "'.");
+            ioe.printStackTrace(System.err);
+        }
+    }
+
     protected EnormousController _ctrl;
     protected int _round = -1;
 
@@ -371,6 +430,7 @@ public class EnormousPanel extends MediaPanel
     protected SausageSprite _qsprite, _rsprite;
     protected int _acidx = -1, _aqidx = -1;
 
+    protected ImageSprite _isprite;
     protected TeamConfigDialog _tconfig;
 
     protected static final int HEADER = 100;

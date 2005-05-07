@@ -116,7 +116,8 @@ public class EnormousConfig
      */
     public static String getQuestionType (int round, int catidx, int questidx)
     {
-        return "normal";
+        String key = "question_type." + round + "." + catidx + "." + questidx;
+        return config.getValue(key, "normal");
     }
 
     /**

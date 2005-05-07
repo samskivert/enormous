@@ -106,16 +106,17 @@ public class EnormousController extends Controller
             System.err.println("No active responder.");
             return;
         }
+        final int responder = _responder;
+        _responder = -1;
 
         final int points = EnormousConfig.getQuestionScore(round, catidx, qidx);
-        _panel.getQuestionSprite().setText("Correct!");
+        _panel.replaceQuestion("Correct!");
         new Interval(EnormousApp.queue) {
             public void expired () {
                 // score points for the active player
-                _teams[_responder].active.score += points;
-                _panel.getTeamSprite(_responder).setPlayer(
-                    _teams[_responder].active);
-                _responder = -1;
+                _teams[responder].active.score += points;
+                _panel.getTeamSprite(responder).setPlayer(
+                    _teams[responder].active);
                 _panel.dismissQuestion(true);
             }
         }.schedule(1000l);
@@ -130,16 +131,17 @@ public class EnormousController extends Controller
             System.err.println("No active responder.");
             return;
         }
+        final int responder = _responder;
+        _responder = -1;
 
         final int points = EnormousConfig.getQuestionScore(round, catidx, qidx);
-        _panel.getQuestionSprite().setText("Bzzzzzt!");
+        _panel.replaceQuestion("Bzzzzzt!");
         new Interval(EnormousApp.queue) {
             public void expired () {
                 // deduct points for the active player
-                _teams[_responder].active.score -= points;
-                _panel.getTeamSprite(_responder).setPlayer(
-                    _teams[_responder].active);
-                _responder = -1;
+                _teams[responder].active.score -= points;
+                _panel.getTeamSprite(responder).setPlayer(
+                    _teams[responder].active);
                 _panel.showAllTeams();
                 _panel.restoreQuestion();
             }
