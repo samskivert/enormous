@@ -84,18 +84,25 @@ public class TeamSprite extends SausageSprite
         _plabel.render(gfx, _bounds.x + _plx, _bounds.y + _ply);
 
         if (_star != null && _stars > 0) {
-            int swidth = _star.getWidth() * _stars + (_stars-1) * GAP;
-            int dx = (_star.getWidth() + GAP);
-            if (swidth > _bounds.width - 2*GAP) {
-                dx = (_bounds.width - 2*GAP - _star.getWidth()) / (_stars-1);
-                swidth = dx * (_stars-1) + _star.getWidth();
-            }
-            int sx = _bounds.x + (_bounds.width - swidth) / 2;
-            int sy = _bounds.y + _ply + _plabel.getSize().height + GAP;
-            for (int ii = 0; ii < _stars; ii++) {
-                gfx.drawImage(_star, sx, sy, null);
-                sx += dx;
-            }
+            drawStars(gfx, _bounds.width - 2*GAP, _bounds.x + GAP,
+                      _bounds.y + _ply + _plabel.getSize().height + GAP,
+                      _stars, true);
+        }
+    }
+
+    public static void drawStars (
+        Graphics2D gfx, int width, int sx, int sy, int count, boolean center)
+    {
+        int swidth = _star.getWidth() * count + (count-1) * GAP;
+        int dx = (_star.getWidth() + GAP);
+        if (swidth > width) {
+            dx = (width - _star.getWidth()) / (count-1);
+            swidth = dx * (count-1) + _star.getWidth();
+        }
+        int ssx = center ? (sx + (width - swidth) / 2) : sx;
+        for (int ii = 0; ii < count; ii++) {
+            gfx.drawImage(_star, ssx, sy, null);
+            ssx += dx;
         }
     }
 

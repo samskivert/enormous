@@ -30,6 +30,7 @@ public class EnormousController extends Controller
     public void setActivePlayer (int teamIndex, String name)
     {
         Team team = _teams[teamIndex];
+        String oactive = (team.active == null) ? null : team.active.name;
 
         // check for an existing player record
         Player active = null;
@@ -44,7 +45,10 @@ public class EnormousController extends Controller
             team.players.add(active);
         }
         team.active = active;
-        active.score = 0;
+        // only reset the score if the player actually changed
+        if (!active.name.equals(oactive)) {
+            active.score = 0;
+        }
         _panel.getTeamSprite(teamIndex).setPlayer(active);
         _panel.clearTeamConfig();
     }
@@ -227,13 +231,6 @@ public class EnormousController extends Controller
         }
 
         return true;
-    }
-
-    protected static class Team
-    {
-        public int stars;
-        public Player active;
-        public ArrayList<Player> players = new ArrayList<Player>();
     }
 
     protected EnormousPanel _panel;

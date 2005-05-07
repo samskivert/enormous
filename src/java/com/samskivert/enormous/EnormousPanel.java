@@ -341,10 +341,9 @@ public class EnormousPanel extends MediaPanel
         // slide a giant "end of round" sprite over the whole board
         int width = getWidth() - 2*GAP;
         int height = getHeight() - FOOTER - 3*GAP;
-        _rsprite = new SausageSprite(
-            width, height, "End of round " + (_round+1),
-            EnormousConfig.questionFont,
-            EnormousConfig.questionColor, "next_round");
+        _rsprite = new InterRoundSprite(
+            width, height, _ctrl._teams, _round,
+            EnormousConfig.questionFont, EnormousConfig.questionColor);
         _rsprite.setRenderOrder(25);
         _rsprite.setLocation(-width, GAP);
         _rsprite.move(new LinePath(new Point(GAP, GAP), 500L));
@@ -381,7 +380,7 @@ public class EnormousPanel extends MediaPanel
 
             } else if (key >= '1' && key <= '9') {
                 int pidx = key - '1';
-                if (pidx >= 0 && pidx < _tsprites.length) {
+                if (pidx >= 0 && pidx < _tsprites.length && _aqidx != -1) {
                     _ctrl.playerResponded(pidx);
                 }
             }
