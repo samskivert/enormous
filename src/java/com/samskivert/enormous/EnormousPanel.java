@@ -26,6 +26,7 @@ import java.util.HashMap;
 import com.samskivert.swing.Controller;
 import com.samskivert.swing.ControllerProvider;
 import com.samskivert.util.Interval;
+import com.samskivert.util.StringUtil;
 
 import com.threerings.media.FrameManager;
 import com.threerings.media.MediaPanel;
@@ -47,24 +48,6 @@ public class EnormousPanel extends MediaPanel
         super(fmgr);
         _ctrl = new EnormousController(this);
         fmgr.getFrame().addKeyListener(this);
-    }
-
-    // documentation inherited
-    public void doLayout ()
-    {
-        super.doLayout();
-
-        // start the first round if appropriate
-        if (_round == -1) {
-            _round = 0;
-            // queue up an event to start round one when the AWT is done
-            // with its initialization business
-            EventQueue.invokeLater(new Runnable() {
-                public void run () {
-                    setRound(0);
-                }
-            });
-        }
     }
 
     /**
@@ -213,23 +196,15 @@ public class EnormousPanel extends MediaPanel
         _qsprite.move(new LinePath(new Point(GAP, HEADER + 2*GAP), 500L));
         addSprite(_qsprite);
 
-        String type = EnormousConfig.getQuestionType(_round, catidx, qidx);
-        if (type.equals("jpg")) {
-            displayImage("rsrc/media/question." + _round + "." +
-                         catidx + "." + qidx + ".jpg");
-        } else if (type.equals("png")) {
-
-        } else if (type.equals("mpg")) {
-            playSound("rsrc/media/question." + _round + "." +
-                      catidx + "." + qidx + ".mpg");
-
-        } else if (type.equals("wav")) {
-            playSound("rsrc/media/question." + _round + "." +
-                      catidx + "." + qidx + ".wav");
-
-        } else if (type.equals("mp3")) {
-            playMP3("rsrc/media/question." + _round + "." +
-                    catidx + "." + qidx + ".mp3");
+        String file = EnormousConfig.getQuestionFile(_round, catidx, qidx);
+        if (file.endsWith("jpg") || file.endsWith("png")) {
+            displayImage(file);
+        } else if (file.endsWith("wav")) {
+            playSound(file);
+        } else if (file.endsWith("mp3")) {
+            playMP3(file);
+        } else if (!StringUtil.blank(file)) {
+            System.err.println("Unknown file type '" + file + "'.");
         }
     }
 
@@ -421,7 +396,7 @@ public class EnormousPanel extends MediaPanel
     {
         try {
             BufferedImage image = ImageIO.read(
-                getClass().getClassLoader().getResourceAsStream(path));
+                EnormousConfig.getResourceAsStream(path));
             _isprite = new ImageSprite(new BufferedMirage(image));
             _isprite.setRenderOrder(50);
             new Interval(EnormousApp.queue) {
@@ -441,7 +416,7 @@ public class EnormousPanel extends MediaPanel
 
     protected void playSound (String path)
     {
-        URL sound = getClass().getClassLoader().getResource(path);
+        URL sound = EnormousConfig.getResource(path);
         _aclip = Applet.newAudioClip(sound);
         new Interval(EnormousApp.queue) {
             public void expired () {
@@ -454,8 +429,7 @@ public class EnormousPanel extends MediaPanel
 
     protected void playMP3 (String path)
     {
-        _aclip = new MP3Player(
-            getClass().getClassLoader().getResourceAsStream(path));
+        _aclip = new MP3Player(EnormousConfig.getResourceAsStream(path));
         new Interval(EnormousApp.queue) {
             public void expired () {
                 if (_aclip != null) {

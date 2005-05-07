@@ -6,6 +6,16 @@ package com.samskivert.enormous;
 import java.awt.Color;
 import java.awt.Font;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Properties;
+
 import com.samskivert.util.Config;
 
 /**
@@ -14,7 +24,7 @@ import com.samskivert.util.Config;
 public class EnormousConfig
 {
     /** Provides access to configuration data. */
-    public static Config config = new Config("rsrc/enormous");
+    public static Config config;
 
     /** The font used to display category selection text. */
     public static Font categoryFont;
@@ -37,6 +47,18 @@ public class EnormousConfig
     /** The background of the questions on the main display. */
     public static Color seenQuestionColor = new Color(0x336600);
 
+    static {
+        // load up our configuration
+        Properties props = new Properties();
+        String path = getPath("enormous.properties");
+        try {
+            props.load(new FileInputStream(path));
+        } catch (IOException ioe) {
+            System.err.println("Error loading '" + path + "': " + ioe);
+        }
+        config = new Config("rsrc/enormous", props);
+    }
+
     /**
      * Configures our various bits based on the size of the screen.
      */
@@ -45,6 +67,42 @@ public class EnormousConfig
         categoryFont = new Font("Helvetica", Font.BOLD, 18);
         questionFont = new Font("Helvetica", Font.BOLD, 48);
         teamFont = new Font("Helvetica", Font.BOLD, 18);
+    }
+
+    public static InputStream getResourceAsStream (String path)
+    {
+        path = getPath(path);
+        try {
+            return new FileInputStream(path);
+        } catch (FileNotFoundException fnfe) {
+            System.err.println("No such file '" + path + "'.");
+            return null;
+        }
+    }
+
+    public static URL getResource (String path)
+    {
+        path = getPath(path);
+        try {
+            return new URL("file://" + path);
+        } catch (MalformedURLException mue) {
+            System.err.println("Invalid path '" + path + "'.");
+            return null;
+        }
+    }
+
+    protected static String getPath (String path)
+    {
+        File home = new File(System.getProperty("user.home"));
+        File desktop = new File(home, "Desktop");
+        File enormous = new File(desktop, "enormous");
+        if (enormous.exists()) {
+            return new File(enormous, path).getPath();
+        } else if (desktop.exists()) {
+            return new File(desktop, path).getPath();
+        } else {
+            return new File(home, path).getPath();
+        }
     }
 
     /**
@@ -112,12 +170,12 @@ public class EnormousConfig
     }
 
     /**
-     * Returns the type of the specified question.
+     * Returns the file associated with the specified question.
      */
-    public static String getQuestionType (int round, int catidx, int questidx)
+    public static String getQuestionFile (int round, int catidx, int questidx)
     {
-        String key = "question_type." + round + "." + catidx + "." + questidx;
-        return config.getValue(key, "normal");
+        String key = "question_file." + round + "." + catidx + "." + questidx;
+        return config.getValue(key, "");
     }
 
     /**
