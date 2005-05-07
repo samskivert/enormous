@@ -226,6 +226,10 @@ public class EnormousPanel extends MediaPanel
         } else if (type.equals("wav")) {
             playSound("rsrc/media/question." + _round + "." +
                       catidx + "." + qidx + ".wav");
+
+        } else if (type.equals("mp3")) {
+            playMP3("rsrc/media/question." + _round + "." +
+                    catidx + "." + qidx + ".mp3");
         }
     }
 
@@ -441,7 +445,22 @@ public class EnormousPanel extends MediaPanel
         _aclip = Applet.newAudioClip(sound);
         new Interval(EnormousApp.queue) {
             public void expired () {
-                _aclip.play();
+                if (_aclip != null) {
+                    _aclip.play();
+                }
+            }
+        }.schedule(2000L);
+    }
+
+    protected void playMP3 (String path)
+    {
+        _aclip = new MP3Player(
+            getClass().getClassLoader().getResourceAsStream(path));
+        new Interval(EnormousApp.queue) {
+            public void expired () {
+                if (_aclip != null) {
+                    _aclip.play();
+                }
             }
         }.schedule(2000L);
     }
