@@ -114,9 +114,9 @@ public class EnormousController extends Controller
         final int responder = _responder;
         _responder = -1;
 
-        final int points = _bonus +
-            EnormousConfig.getQuestionScore(round, catidx, qidx);
-        _panel.replaceQuestion("Correct!");
+        int qscore = EnormousConfig.getQuestionScore(round, catidx, qidx);
+        final int points = qscore + _bonus;
+        _panel.replaceQuestion(qscore > 3 ? "That's ENORMOUS!" : "Correct!");
         new Interval(EnormousApp.queue) {
             public void expired () {
                 // score points for the active player
@@ -141,11 +141,13 @@ public class EnormousController extends Controller
         _responder = -1;
 
         final int points = EnormousConfig.getQuestionScore(round, catidx, qidx);
-        _panel.replaceQuestion("Bzzzzzt!");
+        _panel.replaceQuestion(
+            points > 3 ? "That's ENORMOUSly wrong!" : "Bzzzzt!");
         new Interval(EnormousApp.queue) {
             public void expired () {
                 // deduct points for the active player
-                _teams[responder].active.score -= points;
+                _teams[responder].active.score =
+                    Math.max(_teams[responder].active.score - points, 0);
                 _panel.getTeamSprite(responder).setPlayer(
                     _teams[responder].active);
                 _panel.showAllTeams();
