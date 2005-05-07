@@ -38,6 +38,7 @@ public class EnormousController extends Controller
         loadSound("incorrect");
         loadSound("enorm_correct");
         loadSound("enorm_incorrect");
+        loadSound("round_over");
 
         int[] aweights = EnormousConfig.getAlarmWeights();
         for (int ii = 0; ii < aweights.length; ii++) {

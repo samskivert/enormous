@@ -346,6 +346,9 @@ public class EnormousPanel extends MediaPanel
         _rsprite.setLocation(GAP, -height);
         _rsprite.move(new LinePath(new Point(GAP, GAP), 500L));
         addSprite(_rsprite);
+
+        // play a sound
+        _ctrl.playSound("round_over");
     }
 
     // documentation inherited from interface ControllerProvider
