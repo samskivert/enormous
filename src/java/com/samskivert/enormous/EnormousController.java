@@ -182,6 +182,11 @@ public class EnormousController extends Controller
                 e.printStackTrace(System.err);
             }
 
+        } else if (cmd.equals("end_round")) {
+            if ((action.getModifiers() & ActionEvent.SHIFT_MASK) != 0) {
+                _panel.endRound();
+            }
+
         } else if (cmd.equals("next_round")) {
             _panel.setRound(_panel._round+1);
 

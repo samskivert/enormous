@@ -97,7 +97,7 @@ public class EnormousPanel extends MediaPanel
             String ctitle = EnormousConfig.getCategory(_round, cc);
             SausageSprite cat = new SausageSprite(
                 colwidth, 100, ctitle, EnormousConfig.categoryFont,
-                EnormousConfig.categoryColor, null);
+                EnormousConfig.categoryColor, "end_round");
             cat.setLocation(cx, GAP);
             addSprite(cat);
             _catsprites[cc] = cat;
@@ -121,6 +121,20 @@ public class EnormousPanel extends MediaPanel
             }
             cy += (rowheight + GAP);
         }
+
+        // if we have a round sprite, add it back and then scroll it off
+        // the screen
+        if (_rsprite == null) {
+            return;
+        }
+        addSprite(_rsprite);
+        _rsprite.addSpriteObserver(new PathAdapter() {
+            public void pathCompleted (Sprite sprite, Path path, long when) {
+                removeSprite(sprite);
+            }
+        });
+        _rsprite.move(new LinePath(new Point(getWidth(), GAP), 500L));
+        _rsprite = null;
     }
 
     /**
@@ -279,14 +293,14 @@ public class EnormousPanel extends MediaPanel
         // slide a giant "end of round" sprite over the whole board
         int width = getWidth() - 2*GAP;
         int height = getHeight() - FOOTER - 3*GAP;
-        SausageSprite rsprite = new SausageSprite(
+        _rsprite = new SausageSprite(
             width, height, "End of round " + (_round+1),
             EnormousConfig.questionFont,
             EnormousConfig.questionColor, "next_round");
-        rsprite.setRenderOrder(25);
-        rsprite.setLocation(-width, GAP);
-        rsprite.move(new LinePath(new Point(GAP, GAP), 500L));
-        addSprite(rsprite);
+        _rsprite.setRenderOrder(25);
+        _rsprite.setLocation(-width, GAP);
+        _rsprite.move(new LinePath(new Point(GAP, GAP), 500L));
+        addSprite(_rsprite);
     }
 
     // documentation inherited from interface ControllerProvider
@@ -354,7 +368,7 @@ public class EnormousPanel extends MediaPanel
         new HashMap<Integer,SausageSprite>();
     protected TeamSprite[] _tsprites;
 
-    protected SausageSprite _qsprite;
+    protected SausageSprite _qsprite, _rsprite;
     protected int _acidx = -1, _aqidx = -1;
 
     protected TeamConfigDialog _tconfig;
