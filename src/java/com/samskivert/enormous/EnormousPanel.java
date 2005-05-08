@@ -417,10 +417,12 @@ public class EnormousPanel extends MediaPanel
             _isprite.setRenderOrder(50);
             new Interval(EnormousApp.queue) {
                 public void expired () {
-                    addSprite(_isprite);
-                    int x = (getWidth() - _isprite.getBounds().width)/2;
-                    int y = (getHeight() - _isprite.getBounds().height)/2;
-                    _isprite.setLocation(x, y);
+                    if (_isprite != null) {
+                        addSprite(_isprite);
+                        int x = (getWidth() - _isprite.getBounds().width)/2;
+                        int y = (getHeight() - _isprite.getBounds().height)/2;
+                        _isprite.setLocation(x, y);
+                    }
                 }
             }.schedule(2000L);
 
