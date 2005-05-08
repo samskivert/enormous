@@ -397,7 +397,7 @@ public class EnormousPanel extends MediaPanel
     // documentation inherited
     public Dimension getPreferredSize ()
     {
-        return new Dimension(800, 600);
+        return new Dimension(1024, 768);
     }
 
     // documentation inherited
