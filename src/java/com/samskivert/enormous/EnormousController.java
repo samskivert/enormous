@@ -257,6 +257,7 @@ public class EnormousController extends Controller
 
         } else if (cmd.equals("dismiss")) {
             _panel.dismissQuestion(false);
+            _responder = -1;
 
         } else {
             return super.handleAction(action);
@@ -285,7 +286,9 @@ public class EnormousController extends Controller
 
     protected EnormousPanel _panel;
     protected Team[] _teams;
-    protected HashMap<String,AudioClip> _clips = new HashMap<String,AudioClip>();
+    protected HashMap<String,AudioClip> _clips =
+        new HashMap<String,AudioClip>();
+
     protected int _responder = -1;
     protected int _questions = 0;
     protected int _bonus;
