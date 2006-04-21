@@ -217,7 +217,7 @@ public class EnormousPanel extends MediaPanel
             displayImage(file);
         } else if (file.endsWith("wav") || file.endsWith("mp3")) {
             playSound(file);
-        } else if (!StringUtil.blank(file)) {
+        } else if (!StringUtil.isBlank(file)) {
             System.err.println("Unknown file type '" + file + "'.");
         }
     }
