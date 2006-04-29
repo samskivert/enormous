@@ -3,6 +3,8 @@
 #
 # Proguard configuration file for That's Enormous!
 
+-basedirectory ../
+
 -injars dist/enormous.jar
 -injars lib/samskivert.jar(!META-INF/*,!**/velocity/**,!**/xml/**)
 -injars lib/narya-base.jar(!META-INF/*,!**/tools/**)

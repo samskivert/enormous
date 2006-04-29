@@ -71,6 +71,15 @@ public class EnormousPanel extends MediaPanel
             _tsprites[ii] = new TeamSprite(
                 twidth, FOOTER, ii, EnormousConfig.teamFont,
                 EnormousConfig.getTeamColor(ii));
+            String path = EnormousConfig.getTeamImage(ii);
+            if (path != null) {
+                try {
+                    _tsprites[ii].setBackground(
+                        ImageIO.read(EnormousConfig.getResourceAsStream(path)));
+                } catch (Exception e) {
+                    System.err.println("Failed to load '" + path + "': " + e);
+                }
+            }
             _tsprites[ii].setLocation(tx, height - FOOTER - GAP);
             addSprite(_tsprites[ii]);
             tx += (twidth + GAP);

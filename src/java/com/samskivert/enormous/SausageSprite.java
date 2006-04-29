@@ -8,7 +8,10 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.awt.Stroke;
+import java.awt.geom.RoundRectangle2D;
+import java.awt.image.BufferedImage;
 
 import com.samskivert.swing.Label;
 import com.samskivert.swing.util.SwingUtil;
@@ -47,6 +50,18 @@ public class SausageSprite extends Sprite
     }
 
     /**
+     * Configures this sprite with an image background.
+     */
+    public void setBackground (BufferedImage image)
+    {
+        _bgimage = image;
+        _clip = new RoundRectangle2D.Float(
+            _bounds.x+2, _bounds.y+2, _bounds.width-4,
+            _bounds.height-4, 2*BORDER, 2*BORDER);
+        invalidate();
+    }
+
+    /**
      * Reconfigures this sprite's text.
      */
     public void setText (String text)
@@ -67,12 +82,18 @@ public class SausageSprite extends Sprite
     // documentation inherited
     public void paint (Graphics2D gfx)
     {
-        gfx.setColor(_bgcolor);
-        gfx.fillRoundRect(_bounds.x+2, _bounds.y+2, _bounds.width-4,
-                          _bounds.height-4, 2*BORDER, 2*BORDER);
+        if (_bgimage != null) {
+            Shape oclip = gfx.getClip();
+            gfx.setClip(_clip);
+            gfx.drawImage(_bgimage, _bounds.x+2, _bounds.y+2, null);
+            gfx.setClip(oclip);
+        } else {
+            gfx.setColor(_bgcolor);
+            gfx.fillRoundRect(_bounds.x+2, _bounds.y+2, _bounds.width-4,
+                              _bounds.height-4, 2*BORDER, 2*BORDER);
+        }
 
         Object obj = SwingUtil.activateAntiAliasing(gfx);
-
         renderLabel(gfx);
 
         Stroke ostroke = gfx.getStroke();
@@ -81,7 +102,6 @@ public class SausageSprite extends Sprite
         gfx.drawRoundRect(_bounds.x+2, _bounds.y+2, _bounds.width-4,
                           _bounds.height-4, 2*BORDER, 2*BORDER);
         gfx.setStroke(ostroke);
-
         SwingUtil.restoreAntiAliasing(gfx, obj);
     }
 
@@ -90,6 +110,17 @@ public class SausageSprite extends Sprite
     {
         super.init();
         layoutLabel();
+    }
+
+    // documentation inherited
+    protected void updateRenderOrigin ()
+    {
+        super.updateRenderOrigin();
+        if (_clip != null) {
+            _clip = new RoundRectangle2D.Float(
+                _bounds.x+2, _bounds.y+2, _bounds.width-4,
+                _bounds.height-4, 2*BORDER, 2*BORDER);
+        }
     }
 
     protected void layoutLabel ()
@@ -119,6 +150,9 @@ public class SausageSprite extends Sprite
 
     protected Color _bgcolor;
     protected String _action;
+
+    protected BufferedImage _bgimage;
+    protected Shape _clip;
 
     protected Label _label;
     protected int _lx, _ly;

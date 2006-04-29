@@ -154,6 +154,14 @@ public class EnormousConfig
     }
 
     /**
+     * Returns the background image for the specified team.
+     */
+    public static String getTeamImage (int teamIdx)
+    {
+        return config.getValue("team_image." + teamIdx, (String)null);
+    }
+
+    /**
      * Returns the number of categories in a particular round.
      */
     public static int getCategoryCount (int round)
