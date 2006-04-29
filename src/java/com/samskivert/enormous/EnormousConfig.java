@@ -254,4 +254,13 @@ public class EnormousConfig
     {
         return config.getValue("alarm_bonus." + alarm, 0);
     }
+
+    /**
+     * Returns the path to the audio file that should be played when the
+     * specified function key is pressed, or null.
+     */
+    public static String getAudioFile (String fkey)
+    {
+        return config.getValue("audio_file." + fkey, (String)null);
+    }
 }

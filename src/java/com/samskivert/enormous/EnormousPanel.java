@@ -211,7 +211,7 @@ public class EnormousPanel extends MediaPanel
         if (file.endsWith("jpg") || file.endsWith("png")) {
             displayImage(file);
         } else if (file.endsWith("wav") || file.endsWith("mp3")) {
-            playSound(file);
+            playSound(file, 2000L);
         } else if (!StringUtil.isBlank(file)) {
             System.err.println("Unknown file type '" + file + "'.");
         }
@@ -241,7 +241,7 @@ public class EnormousPanel extends MediaPanel
         // back up again
         String file = EnormousConfig.getQuestionFile(_round, _acidx, _aqidx);
         if (file.endsWith("wav") || file.endsWith("mp3")) {
-            playSound(file);
+            playSound(file, 2000L);
         }
     }
 
@@ -395,6 +395,26 @@ public class EnormousPanel extends MediaPanel
                 }
             }
         }
+
+        // the function keys can be used to trigger audio cues
+        String fkey = null;
+        switch (e.getKeyCode()) {
+        case KeyEvent.VK_F1: fkey = "f1"; break;
+        case KeyEvent.VK_F2: fkey = "f2"; break;
+        case KeyEvent.VK_F3: fkey = "f3"; break;
+        case KeyEvent.VK_F4: fkey = "f4"; break;
+        case KeyEvent.VK_F5: fkey = "f5"; break;
+        case KeyEvent.VK_F6: fkey = "f6"; break;
+        case KeyEvent.VK_F7: fkey = "f7"; break;
+        case KeyEvent.VK_F8: fkey = "f8"; break;
+        case KeyEvent.VK_F9: fkey = "f9"; break;
+        }
+        if (fkey != null) {
+            String path = EnormousConfig.getAudioFile(fkey);
+            if (path != null) {
+                playSound(path, 100L);
+            }
+        }
     }
 
     // documentation inherited from interface KeyListener
@@ -483,8 +503,14 @@ public class EnormousPanel extends MediaPanel
         }
     }
 
-    protected void playSound (String path)
+    protected void playSound (String path, long delay)
     {
+        // if there is an audio clip currently playing, stop it
+        if (_aclip != null) {
+            _aclip.stop();
+            _aclip = null;
+        }
+
         _aclip = loadSound(path);
         new Interval(EnormousApp.queue) {
             public void expired () {
@@ -492,7 +518,7 @@ public class EnormousPanel extends MediaPanel
                     _aclip.play();
                 }
             }
-        }.schedule(2000L);
+        }.schedule(delay);
     }
 
     protected EnormousController _ctrl;
