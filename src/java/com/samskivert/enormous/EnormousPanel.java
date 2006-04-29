@@ -118,17 +118,7 @@ public class EnormousPanel extends MediaPanel
 
         // if we have a round sprite, add it back and then scroll it off
         // the screen
-        if (_rsprite == null) {
-            return;
-        }
-        addSprite(_rsprite);
-        _rsprite.addSpriteObserver(new PathAdapter() {
-            public void pathCompleted (Sprite sprite, Path path, long when) {
-                removeSprite(sprite);
-            }
-        });
-        _rsprite.move(new LinePath(new Point(GAP, -getHeight()), 500L));
-        _rsprite = null;
+        clearInterRoundSprite();
     }
 
     /**
@@ -190,9 +180,14 @@ public class EnormousPanel extends MediaPanel
         _acidx = catidx;
         _aqidx = qidx;
 
+        // make sure this question hasn't already been answered
+        SausageSprite qs = getQuestionSprite(catidx, qidx);
+        if (qs == null) {
+            return;
+        }
+
         // mark the question itself as having been seen
-        getQuestionSprite(catidx, qidx).setBackground(
-            EnormousConfig.seenQuestionColor);
+        qs.setBackground(EnormousConfig.seenQuestionColor);
 
         // display only the category in question
         for (int ii = 0; ii < _catsprites.length; ii++) {
@@ -240,6 +235,13 @@ public class EnormousPanel extends MediaPanel
         if (_isprite != null && !isManaged(_isprite)) {
             // restore the image sprite
             addSprite(_isprite);
+        }
+
+        // if there was a sound file that went with this question, start it
+        // back up again
+        String file = EnormousConfig.getQuestionFile(_round, _acidx, _aqidx);
+        if (file.endsWith("wav") || file.endsWith("mp3")) {
+            playSound(file);
         }
     }
 
@@ -334,18 +336,19 @@ public class EnormousPanel extends MediaPanel
         }
     }
 
+    public void toggleRoundStatus ()
+    {
+        if (_rsprite != null) {
+            clearInterRoundSprite();
+        } else {
+            addInterRoundSprite(true);
+        }
+    }
+
     public void endRound ()
     {
         // slide a giant "end of round" sprite over the whole board
-        int width = getWidth() - 2*GAP;
-        int height = getHeight() - FOOTER - 3*GAP;
-        _rsprite = new InterRoundSprite(
-            width, height, _ctrl._teams, _round,
-            EnormousConfig.questionFont, EnormousConfig.questionColor);
-        _rsprite.setRenderOrder(25);
-        _rsprite.setLocation(GAP, -height);
-        _rsprite.move(new LinePath(new Point(GAP, GAP), 500L));
-        addSprite(_rsprite);
+        addInterRoundSprite(false);
 
         // play a sound
         _ctrl.playSound("round_over");
@@ -380,6 +383,12 @@ public class EnormousPanel extends MediaPanel
                 _ctrl.answerWasCanceled();
 
             } else if (key >= '1' && key <= '9') {
+                // if there is an audio clip playing, stop it
+                if (_aclip != null) {
+                    _aclip.stop();
+                    _aclip = null;
+                }
+
                 int pidx = key - '1';
                 if (pidx >= 0 && pidx < _tsprites.length && _aqidx != -1) {
                     _ctrl.playerResponded(pidx);
@@ -406,6 +415,37 @@ public class EnormousPanel extends MediaPanel
         super.paintBehind(gfx, dirtyRect);
         gfx.setColor(EnormousConfig.backgroundColor);
         gfx.fill(dirtyRect);
+    }
+
+    protected void addInterRoundSprite (boolean statusOnly)
+    {
+        int width = getWidth() - 2*GAP;
+        int height = getHeight() - FOOTER - 3*GAP;
+        _rsprite = new InterRoundSprite(
+            width, height, _ctrl._teams, _round,
+            EnormousConfig.questionFont, EnormousConfig.questionColor,
+            statusOnly);
+        _rsprite.setRenderOrder(25);
+        _rsprite.setLocation(GAP, -height);
+        _rsprite.move(new LinePath(new Point(GAP, GAP), 500L));
+        addSprite(_rsprite);
+    }
+
+    protected void clearInterRoundSprite ()
+    {
+        if (_rsprite == null) {
+            return;
+        }
+        if (!isManaged(_rsprite)) {
+            addSprite(_rsprite);
+        }
+        _rsprite.addSpriteObserver(new PathAdapter() {
+            public void pathCompleted (Sprite sprite, Path path, long when) {
+                removeSprite(sprite);
+            }
+        });
+        _rsprite.move(new LinePath(new Point(GAP, -getHeight()), 500L));
+        _rsprite = null;
     }
 
     protected void displayImage (String path)

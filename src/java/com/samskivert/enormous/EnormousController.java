@@ -139,11 +139,12 @@ public class EnormousController extends Controller
         final int responder = _responder;
         _responder = -1;
 
+        boolean enormous = (qidx == EnormousConfig.getQuestionCount(round)-1);
         int qscore = EnormousConfig.getQuestionScore(round, catidx, qidx);
-        playSound(qscore > 3 ? "enorm_correct" : "correct");
+        playSound(enormous ? "enorm_correct" : "correct");
 
         final int points = qscore + _bonus;
-        _panel.replaceQuestion(qscore > 3 ? "That's ENORMOUS!" : "Correct!");
+        _panel.replaceQuestion(enormous ? "That's ENORMOUS!" : "Correct!");
         new Interval(EnormousApp.queue) {
             public void expired () {
                 // score points for the active player
@@ -167,11 +168,12 @@ public class EnormousController extends Controller
         final int responder = _responder;
         _responder = -1;
 
+        boolean enormous = (qidx == EnormousConfig.getQuestionCount(round)-1);
         final int points = EnormousConfig.getQuestionScore(round, catidx, qidx);
-        playSound(points > 3 ? "enorm_incorrect" : "incorrect");
+        playSound(enormous ? "enorm_incorrect" : "incorrect");
 
         _panel.replaceQuestion(
-            points > 3 ? "That's ENORMOUSly wrong!" : "Bzzzzt!");
+            enormous ? "That's ENORMOUSly wrong!" : "Bzzzzt!");
         new Interval(EnormousApp.queue) {
             public void expired () {
                 // deduct points for the active player
@@ -246,9 +248,14 @@ public class EnormousController extends Controller
                 e.printStackTrace(System.err);
             }
 
+        } else if (cmd.equals("toggle_status")) {
+            _panel.toggleRoundStatus();
+
         } else if (cmd.equals("end_round")) {
             if ((action.getModifiers() & ActionEvent.SHIFT_MASK) != 0) {
                 _panel.endRound();
+            } else {
+                _panel.toggleRoundStatus();
             }
 
         } else if (cmd.equals("next_round")) {

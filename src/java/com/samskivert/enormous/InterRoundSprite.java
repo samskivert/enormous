@@ -17,10 +17,11 @@ import com.samskivert.swing.Label;
 public class InterRoundSprite extends SausageSprite
 {
     public InterRoundSprite (int width, int height, Team[] teams, int round,
-                             Font font, Color bgcolor)
+                             Font font, Color bgcolor, boolean statusOnly)
     {
-        super(width, height, "End of round " + (round+1),
-              font, bgcolor, "next_round");
+        super(width, height, (statusOnly ? "Status" : "End") +
+              " of round " + (round+1), font, bgcolor,
+              statusOnly ? "toggle_status" : "next_round");
 
         _teams = teams;
         _colwidth = (width - 2*WBORDER - (teams.length-1) * BORDER) /
