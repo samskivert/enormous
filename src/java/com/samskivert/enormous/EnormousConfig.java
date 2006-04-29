@@ -36,16 +36,16 @@ public class EnormousConfig
     public static Font teamFont;
 
     /** The background of the whole screen. */
-    public static Color backgroundColor = Color.blue;
+    public static Color backgroundColor = new Color(0x996600);
 
     /** The background of the categories on the main display. */
     public static Color categoryColor = Color.red;
 
     /** The background of the questions on the main display. */
-    public static Color questionColor = new Color(0x99CC66);
+    public static Color questionColor = new Color(0x6699CC);
 
     /** The background of the questions on the main display. */
-    public static Color seenQuestionColor = new Color(0x336600);
+    public static Color seenQuestionColor = new Color(0x003366);
 
     static {
         // load up our configuration
@@ -145,12 +145,13 @@ public class EnormousConfig
      */
     public static Color getTeamColor (int teamIdx)
     {
-        switch (teamIdx) {
-        case 0: return Color.red;
-        case 1: return Color.white;
-        case 2: return Color.blue;
+        String colstr = config.getValue("team_color." + teamIdx, "#FFCC99");
+        try {
+            return new Color(Integer.parseInt(colstr.substring(1), 16));
+        } catch (Exception e) {
+            System.err.println("Invalid team color " + teamIdx + ": " + colstr);
+            return Color.blue;
         }
-        return Color.black;
     }
 
     /**
@@ -185,6 +186,17 @@ public class EnormousConfig
     {
         return config.getValue("category_name." + round + "." + index,
                                "category." + round + "." + index);
+    }
+
+    /**
+     * Returns the background image for the specified category in the specified
+     * round.
+     */
+    public static String getCategoryImage (int round, int index)
+    {
+        String defimg = config.getValue("category_image", (String)null);
+        defimg = config.getValue("category_image." + index, defimg);
+        return config.getValue("category_image." + round + "." + index, defimg);
     }
 
     /**

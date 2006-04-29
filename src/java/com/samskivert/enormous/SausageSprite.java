@@ -54,6 +54,11 @@ public class SausageSprite extends Sprite
      */
     public void setBackground (BufferedImage image)
     {
+        // if we have a background, put an outline on our font
+        _label.setStyle(Label.OUTLINE);
+        _label.setAlternateColor(Color.black);
+
+        // configure the background and clipping region
         _bgimage = image;
         _clip = new RoundRectangle2D.Float(
             _bounds.x+2, _bounds.y+2, _bounds.width-4,
@@ -84,7 +89,7 @@ public class SausageSprite extends Sprite
     {
         if (_bgimage != null) {
             Shape oclip = gfx.getClip();
-            gfx.setClip(_clip);
+            gfx.clip(_clip);
             gfx.drawImage(_bgimage, _bounds.x+2, _bounds.y+2, null);
             gfx.setClip(oclip);
         } else {

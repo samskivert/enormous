@@ -71,15 +71,8 @@ public class EnormousPanel extends MediaPanel
             _tsprites[ii] = new TeamSprite(
                 twidth, FOOTER, ii, EnormousConfig.teamFont,
                 EnormousConfig.getTeamColor(ii));
-            String path = EnormousConfig.getTeamImage(ii);
-            if (path != null) {
-                try {
-                    _tsprites[ii].setBackground(
-                        ImageIO.read(EnormousConfig.getResourceAsStream(path)));
-                } catch (Exception e) {
-                    System.err.println("Failed to load '" + path + "': " + e);
-                }
-            }
+            _tsprites[ii].setBackground(
+                loadImage(EnormousConfig.getTeamImage(ii)));
             _tsprites[ii].setLocation(tx, height - FOOTER - GAP);
             addSprite(_tsprites[ii]);
             tx += (twidth + GAP);
@@ -101,6 +94,8 @@ public class EnormousPanel extends MediaPanel
             SausageSprite cat = new SausageSprite(
                 colwidth, 100, ctitle, EnormousConfig.categoryFont,
                 EnormousConfig.categoryColor, "end_round");
+            cat.setBackground(
+                loadImage(EnormousConfig.getCategoryImage(_round, cc)));
             cat.setLocation(cx, GAP);
             addSprite(cat);
             _catsprites[cc] = cat;
@@ -479,25 +474,35 @@ public class EnormousPanel extends MediaPanel
 
     protected void displayImage (String path)
     {
-        try {
-            BufferedImage image = ImageIO.read(
-                EnormousConfig.getResourceAsStream(path));
-            _isprite = new ImageSprite(new BufferedMirage(image));
-            _isprite.setRenderOrder(50);
-            new Interval(EnormousApp.queue) {
-                public void expired () {
-                    if (_isprite != null) {
-                        addSprite(_isprite);
-                        int x = (getWidth() - _isprite.getBounds().width)/2;
-                        int y = (getHeight() - _isprite.getBounds().height)/2;
-                        _isprite.setLocation(x, y);
-                    }
-                }
-            }.schedule(2000L);
+        BufferedImage image = loadImage(path);
+        if (image == null) {
+            return;
+        }
 
-        } catch (IOException ioe) {
-            System.err.println("Failed to load '" + path + "'.");
-            ioe.printStackTrace(System.err);
+        _isprite = new ImageSprite(new BufferedMirage(image));
+        _isprite.setRenderOrder(50);
+        new Interval(EnormousApp.queue) {
+            public void expired () {
+                if (_isprite != null) {
+                    addSprite(_isprite);
+                    int x = (getWidth() - _isprite.getBounds().width)/2;
+                    int y = (getHeight() - _isprite.getBounds().height)/2;
+                    _isprite.setLocation(x, y);
+                }
+            }
+        }.schedule(2000L);
+    }
+
+    protected BufferedImage loadImage (String path)
+    {
+        if (StringUtil.isBlank(path)) {
+            return null;
+        }
+        try {
+            return ImageIO.read(EnormousConfig.getResourceAsStream(path));
+        } catch (Exception e) {
+            System.err.println("Failed to load image '" + path + "': " + e);
+            return null;
         }
     }
 

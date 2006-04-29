@@ -27,10 +27,12 @@ public class TeamSprite extends SausageSprite
               font, bgcolor, "team:" + teamIdx);
 
         _plabel = new Label("???");
-        _plabel.setTextColor(bgcolor == Color.white ? Color.blue : Color.white);
+        _plabel.setTextColor(_label.getTextColor());
         _plabel.setFont(font);
         _plabel.setTargetWidth(width-2*BORDER);
         _plabel.setAlignment(Label.CENTER);
+        _plabel.setStyle(Label.OUTLINE);
+        _plabel.setAlternateColor(Color.black);
 
         try {
             if (_star == null) {
