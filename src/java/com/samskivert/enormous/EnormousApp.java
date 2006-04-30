@@ -47,11 +47,14 @@ public class EnormousApp
         GraphicsEnvironment env =
             GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice gd = env.getDefaultScreenDevice();
+        System.out.println("FS " + System.getProperty("full_screen") +
+                           " SUP " + gd.isFullScreenSupported());
         if (System.getProperty("full_screen") != null &&
             gd.isFullScreenSupported()) {
             // set up full screen mode if we're on vinders
+            frame.setUndecorated(true);
             gd.setFullScreenWindow(frame);
-            DisplayMode pmode = ModeUtil.getDisplayMode(gd, 800, 600, 16, 15);
+            DisplayMode pmode = ModeUtil.getDisplayMode(gd, 1024, 768, 16, 15);
             if (pmode != null) {
                 gd.setDisplayMode(pmode);
             }

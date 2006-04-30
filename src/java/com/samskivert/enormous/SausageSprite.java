@@ -78,6 +78,14 @@ public class SausageSprite extends Sprite
         }
     }
 
+    /**
+     * Reconfigures this sprite's action command.
+     */
+    public void setActionCommand (String action)
+    {
+        _action = action;
+    }
+
     // documentation inherited from interface ActionSprite
     public String getActionCommand ()
     {

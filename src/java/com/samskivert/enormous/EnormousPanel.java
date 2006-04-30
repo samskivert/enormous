@@ -154,6 +154,12 @@ public class EnormousPanel extends MediaPanel
      */
     public void displayAlarm (String text, String command)
     {
+        // this only happens if someone is getting crazy click happy, so just
+        // ignore them
+        if (_qsprite != null) {
+            return;
+        }
+
         int width = getWidth() - 2*GAP;
         int height = getHeight() - HEADER - FOOTER - 4*GAP;
         _qsprite = new SausageSprite(
@@ -180,15 +186,15 @@ public class EnormousPanel extends MediaPanel
             dismissQuestion(false);
         }
 
-        // note that this is the active question
-        _acidx = catidx;
-        _aqidx = qidx;
-
         // make sure this question hasn't already been answered
         SausageSprite qs = getQuestionSprite(catidx, qidx);
         if (qs == null) {
             return;
         }
+
+        // note that this is the active question
+        _acidx = catidx;
+        _aqidx = qidx;
 
         // mark the question itself as having been seen
         qs.setBackground(EnormousConfig.seenQuestionColor);
@@ -221,9 +227,12 @@ public class EnormousPanel extends MediaPanel
         }
     }
 
-    public void replaceQuestion (String text)
+    public void replaceQuestion (String text, boolean clearAction)
     {
         _qsprite.setText(text);
+        if (clearAction) {
+            _qsprite.setActionCommand("");
+        }
         if (_isprite != null) {
             // temporarily remove the image sprite
             removeSprite(_isprite);
@@ -280,6 +289,7 @@ public class EnormousPanel extends MediaPanel
             _aclip = null;
         }
 
+        int oacidx = _acidx, oaqidx = _aqidx;
         // clear the active question and player
         _acidx = _aqidx = -1;
         showAllTeams();
@@ -287,6 +297,7 @@ public class EnormousPanel extends MediaPanel
         if (_qsprite == null) {
             return;
         }
+
         _qsprite.addSpriteObserver(new PathAdapter() {
             public void pathCompleted (Sprite sprite, Path path, long when) {
                 removeSprite(sprite);

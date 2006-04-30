@@ -144,7 +144,8 @@ public class EnormousController extends Controller
         playSound(enormous ? "enorm_correct" : "correct");
 
         final int points = qscore + _bonus;
-        _panel.replaceQuestion(enormous ? "That's ENORMOUS!" : "Correct!");
+        _panel.replaceQuestion(
+            enormous ? "That's ENORMOUS!" : "Correct!", true);
         new Interval(EnormousApp.queue) {
             public void expired () {
                 // score points for the active player
@@ -173,7 +174,7 @@ public class EnormousController extends Controller
         playSound(enormous ? "enorm_incorrect" : "incorrect");
 
         _panel.replaceQuestion(
-            enormous ? "That's ENORMOUSly wrong!" : "Bzzzzt!");
+            enormous ? "That's ENORMOUSly wrong!" : "Bzzzzt!", false);
         new Interval(EnormousApp.queue) {
             public void expired () {
                 // deduct points for the active player
