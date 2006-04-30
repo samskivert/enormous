@@ -91,6 +91,11 @@ public class EnormousConfig
         }
     }
 
+    public static File getResourceFile (String path)
+    {
+        return new File(getPath(path));
+    }
+
     protected static String getPath (String path)
     {
         File home = new File(System.getProperty("user.home"));

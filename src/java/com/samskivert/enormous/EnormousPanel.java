@@ -404,9 +404,12 @@ public class EnormousPanel extends MediaPanel
                     _aclip = null;
                 }
 
-                int pidx = key - '1';
-                if (pidx >= 0 && pidx < _tsprites.length && _aqidx != -1) {
-                    _ctrl.playerResponded(pidx);
+                // make sure there's an active question
+                if (!StringUtil.isBlank(_qsprite.getActionCommand())) {
+                    int pidx = key - '1';
+                    if (pidx >= 0 && pidx < _tsprites.length && _aqidx != -1) {
+                        _ctrl.playerResponded(pidx);
+                    }
                 }
             }
         }
@@ -522,7 +525,7 @@ public class EnormousPanel extends MediaPanel
         if (path.endsWith("mp3")) {
             return new MP3Player(EnormousConfig.getResourceAsStream(path));
         } else if (path.endsWith("wav")) {
-            return new WAVPlayer(EnormousConfig.getResourceAsStream(path));
+            return new WAVPlayer(EnormousConfig.getResourceFile(path));
         } else {
             return null;
         }
