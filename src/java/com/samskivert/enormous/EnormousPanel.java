@@ -522,7 +522,7 @@ public class EnormousPanel extends MediaPanel
         if (path.endsWith("mp3")) {
             return new MP3Player(EnormousConfig.getResourceAsStream(path));
         } else if (path.endsWith("wav")) {
-            return Applet.newAudioClip(EnormousConfig.getResource(path));
+            return new WAVPlayer(EnormousConfig.getResourceAsStream(path));
         } else {
             return null;
         }
