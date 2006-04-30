@@ -88,16 +88,21 @@ public class EnormousController extends Controller
         if (team.active == null) {
             return;
         }
-        if (team.active.score < 6) {
+        int[] spoints = EnormousConfig.getStarPoints();
+        if (team.active.score < spoints[0]) {
             return;
         }
 
         playSound("cash_in");
 
-        int stars = (team.active.score - 3) / 3;
-        team.active.score = team.active.score % 3;
+        int stars = 0;
+        while (stars < spoints.length && spoints[stars] <= team.active.score) {
+            stars++;
+        }
+        team.active.score -= spoints[stars-1];
         team.active.stars += stars;
         team.stars += stars;
+
         _panel.getTeamSprite(teamIndex).setPlayer(team.active);
         _panel.getTeamSprite(teamIndex).setStars(team.stars);
     }
@@ -266,6 +271,9 @@ public class EnormousController extends Controller
         } else if (cmd.equals("dismiss")) {
             _panel.dismissQuestion(false);
             _responder = -1;
+
+        } else if (cmd.equals("noop")) {
+            // they clicked on a cleared out sprite, no problem
 
         } else {
             return super.handleAction(action);

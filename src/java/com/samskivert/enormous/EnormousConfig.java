@@ -185,6 +185,15 @@ public class EnormousConfig
     }
 
     /**
+     * Returns an array indicating how many points are required to get certain
+     * numbers of stars.
+     */
+    public static int[] getStarPoints ()
+    {
+        return config.getValue("star_points", new int[] { 6, 9, 12, 15, 18 });
+    }
+
+    /**
      * Returns the name of the specified category in the specified round.
      */
     public static String getCategory (int round, int index)

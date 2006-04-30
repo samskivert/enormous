@@ -231,7 +231,7 @@ public class EnormousPanel extends MediaPanel
     {
         _qsprite.setText(text);
         if (clearAction) {
-            _qsprite.setActionCommand("");
+            _qsprite.setActionCommand("noop");
         }
         if (_isprite != null) {
             // temporarily remove the image sprite
