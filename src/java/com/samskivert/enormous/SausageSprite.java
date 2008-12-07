@@ -25,13 +25,12 @@ import com.threerings.media.sprite.action.ActionSprite;
 public class SausageSprite extends Sprite
     implements ActionSprite
 {
-    public SausageSprite (int width, int height, String text,
-                          Font font, Color bgcolor, String action)
+    public SausageSprite (
+        int width, int height, String text, Font font, Color bgcolor, String action)
     {
         super(width, height);
-
-        _bgcolor = bgcolor;
         _action = action;
+        _bgkey = new SausageCache.Key(width, height, font, bgcolor, null, text, Label.CENTER);
 
         _label = new Label(text);
         _label.setTextColor(bgcolor == Color.white ? Color.blue : Color.white);
@@ -45,7 +44,7 @@ public class SausageSprite extends Sprite
      */
     public void setBackground (Color bgcolor)
     {
-        _bgcolor = bgcolor;
+        _bgkey = _bgkey.setBackground(bgcolor);
         invalidate();
     }
 
@@ -54,15 +53,11 @@ public class SausageSprite extends Sprite
      */
     public void setBackground (BufferedImage image)
     {
-        // if we have a background, put an outline on our font
+        // we have a background now, so put an outline on our font
         _label.setStyle(Label.OUTLINE);
         _label.setAlternateColor(Color.black);
 
-        // configure the background and clipping region
-        _bgimage = image;
-        _clip = new RoundRectangle2D.Float(
-            _bounds.x+2, _bounds.y+2, _bounds.width-4,
-            _bounds.height-4, 2*BORDER, 2*BORDER);
+        _bgkey = _bgkey.setBackground(image);
         invalidate();
     }
 
@@ -76,14 +71,9 @@ public class SausageSprite extends Sprite
             layoutLabel();
             invalidate();
         }
-    }
 
-    /**
-     * Reconfigures this sprite's action command.
-     */
-    public void setActionCommand (String action)
-    {
-        _action = action;
+//         _bgkey = _bgkey.setText(text);
+//         invalidate();
     }
 
     /**
@@ -92,6 +82,16 @@ public class SausageSprite extends Sprite
     public void setAlignment (int align)
     {
         _label.setAlignment(align);
+//         _bgkey = _bgkey.setAlignment(align);
+//         invalidate();
+    }
+
+    /**
+     * Reconfigures this sprite's action command.
+     */
+    public void setActionCommand (String action)
+    {
+        _action = action;
     }
 
     // documentation inherited from interface ActionSprite
@@ -103,27 +103,8 @@ public class SausageSprite extends Sprite
     // documentation inherited
     public void paint (Graphics2D gfx)
     {
-        if (_bgimage != null) {
-            Shape oclip = gfx.getClip();
-            gfx.clip(_clip);
-            gfx.drawImage(_bgimage, _bounds.x+2, _bounds.y+2, null);
-            gfx.setClip(oclip);
-        } else {
-            gfx.setColor(_bgcolor);
-            gfx.fillRoundRect(_bounds.x+2, _bounds.y+2, _bounds.width-4,
-                              _bounds.height-4, 2*BORDER, 2*BORDER);
-        }
-
-        Object obj = SwingUtil.activateAntiAliasing(gfx);
+        gfx.drawImage(SausageCache.getSausage(_bgkey), _bounds.x, _bounds.y, null);
         renderLabel(gfx);
-
-        Stroke ostroke = gfx.getStroke();
-        gfx.setStroke(FAT_STROKE);
-        gfx.setColor(Color.white);
-        gfx.drawRoundRect(_bounds.x+2, _bounds.y+2, _bounds.width-4,
-                          _bounds.height-4, 2*BORDER, 2*BORDER);
-        gfx.setStroke(ostroke);
-        SwingUtil.restoreAntiAliasing(gfx, obj);
     }
 
     // documentation inherited
@@ -131,17 +112,6 @@ public class SausageSprite extends Sprite
     {
         super.init();
         layoutLabel();
-    }
-
-    // documentation inherited
-    protected void updateRenderOrigin ()
-    {
-        super.updateRenderOrigin();
-        if (_clip != null) {
-            _clip = new RoundRectangle2D.Float(
-                _bounds.x+2, _bounds.y+2, _bounds.width-4,
-                _bounds.height-4, 2*BORDER, 2*BORDER);
-        }
     }
 
     protected void layoutLabel ()
@@ -169,15 +139,11 @@ public class SausageSprite extends Sprite
         _label.render(gfx, _bounds.x + _lx, _bounds.y + _ly);
     }
 
-    protected Color _bgcolor;
     protected String _action;
-
-    protected BufferedImage _bgimage;
-    protected Shape _clip;
+    protected SausageCache.Key _bgkey;
 
     protected Label _label;
     protected int _lx, _ly;
 
     protected static final int BORDER = 10;
-    protected static final Stroke FAT_STROKE = new BasicStroke(3f);
 }

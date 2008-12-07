@@ -447,24 +447,30 @@ public class EnormousPanel extends MediaPanel
         }
     }
 
-    // documentation inherited from interface ControllerProvider
+    // from interface ControllerProvider
     public Controller getController ()
     {
         return _ctrl;
     }
 
-    // documentation inherited
+    @Override // from MediaPanel
     public Dimension getPreferredSize ()
     {
         return new Dimension(1024, 768);
     }
 
-    // documentation inherited
-    protected void paintBehind (Graphics2D gfx, Rectangle dirtyRect)
+    @Override // from MediaPanel
+    public void addSprite (Sprite sprite)
     {
-        super.paintBehind(gfx, dirtyRect);
-        gfx.setColor(EnormousConfig.backgroundColor);
-        gfx.fill(dirtyRect);
+        super.addSprite(sprite);
+        ((ClearableActionSpriteHandler)_actionHandler).clearActiveSprite();
+    }
+
+    @Override // from MediaPanel
+    public void removeSprite (Sprite sprite)
+    {
+        super.removeSprite(sprite);
+        ((ClearableActionSpriteHandler)_actionHandler).clearActiveSprite();
     }
 
     protected void addInterRoundSprite (boolean statusOnly)
@@ -570,6 +576,20 @@ public class EnormousPanel extends MediaPanel
         }.schedule(delay);
     }
 
+    @Override // from MediaPanel
+    protected void paintBehind (Graphics2D gfx, Rectangle dirtyRect)
+    {
+        super.paintBehind(gfx, dirtyRect);
+        gfx.setColor(EnormousConfig.backgroundColor);
+        gfx.fill(dirtyRect);
+    }
+
+    @Override // from MediaPanel
+    protected ActionSpriteHandler createActionSpriteHandler ()
+    {
+        return new ClearableActionSpriteHandler();
+    }
+
     protected static boolean isImagePath (String path)
     {
         path = path.toLowerCase();
@@ -580,6 +600,13 @@ public class EnormousPanel extends MediaPanel
     {
         path = path.toLowerCase();
         return path.endsWith(".wav") || path.endsWith(".mp3");
+    }
+
+    protected class ClearableActionSpriteHandler extends ActionSpriteHandler
+    {
+        public void clearActiveSprite () {
+            _activeSprite = null;
+        }
     }
 
     protected KeyListener _keylist = new KeyAdapter() {
