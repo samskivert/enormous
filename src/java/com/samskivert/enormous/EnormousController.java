@@ -10,14 +10,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.base.Predicate;
 
 import com.samskivert.swing.Controller;
 import com.samskivert.util.RandomUtil;
 import com.samskivert.util.Interval;
 import com.samskivert.util.StringUtil;
+
+import com.samskivert.enormous.EnormousConfig.Alarm;
 
 /**
  * Manages the flow of the game.
@@ -48,7 +52,7 @@ public class EnormousController extends Controller
         loadSound("question_warn");
         loadSound("question_cancel");
 
-        for (EnormousConfig.Alarm alarm : EnormousConfig.getAlarms()) {
+        for (Alarm alarm : EnormousConfig.getAlarms()) {
             loadSound("alarm_sound." + alarm.index);
         }
 
@@ -94,12 +98,11 @@ public class EnormousController extends Controller
         // only reset the score if the player actually changed
         if (!active.name.equals(oactive)) {
             active.score = 0;
+            // clear out our "questions since change" as well
+            _changeQs.clear();
         }
         _panel.getTeamSprite(teamIndex).setPlayer(active);
         _panel.clearTeamConfig();
-
-        // clear out our "questions since change"
-        _changeQs.clear();
     }
 
     public void configureTeams (TeamSprite[] sprites)
@@ -294,7 +297,7 @@ public class EnormousController extends Controller
         }
 
         // occasionally, we pop up an alarm instead of immediately going to a new question
-        EnormousConfig.Alarm alarm = noalarm ? null : pickAlarm(catidx, qidx);
+        Alarm alarm = noalarm ? null : pickAlarm(catidx, qidx);
         if (alarm != null) {
             String text = alarm.text;
             _bonus = alarm.bonus;
@@ -325,24 +328,24 @@ public class EnormousController extends Controller
         _changeQs.add(catidx + ":" + qidx);
     }
 
-    protected EnormousConfig.Alarm pickAlarm (int catidx, int qidx)
+    protected Alarm pickAlarm (int catidx, int qidx)
     {
         // filter out alarms that only happen after more post-change questions
-        List<EnormousConfig.Alarm> allowed = Lists.newArrayList();
-        for (EnormousConfig.Alarm alarm : EnormousConfig.getAlarms()) {
-            if (alarm.minPostChangeQs < _changeQs.size()) {
-                allowed.add(alarm);
+        List<Alarm> alarms = Lists.newArrayList(
+            Iterables.filter(EnormousConfig.getAlarms(), new Predicate<Alarm>() {
+            public boolean apply (Alarm alarm) {
+                return alarm.minPostChangeQs < _changeQs.size();
             }
-        }
-        if (allowed.isEmpty()) {
+        }));
+        if (alarms.isEmpty()) {
             return null;
         }
 
-        int[] weights = new int[allowed.size()];
+        int[] weights = new int[alarms.size()];
         for (int ii = 0; ii < weights.length; ii++) {
-            weights[ii] = allowed.get(ii).weight;
+            weights[ii] = alarms.get(ii).weight;
         }
-        return allowed.get(RandomUtil.getWeightedIndex(weights));
+        return alarms.get(RandomUtil.getWeightedIndex(weights));
     }
 
     /**
