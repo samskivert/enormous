@@ -30,7 +30,7 @@ public class SausageSprite extends Sprite
     {
         super(width, height);
         _action = action;
-        _bgkey = new SausageCache.Key(width, height, font, bgcolor, null, text, Label.CENTER);
+        _bgkey = new SausageCache.Key(width, height, bgcolor, null, font, text, Label.CENTER);
 
         _label = new Label(text);
         _label.setTextColor(bgcolor == Color.white ? Color.blue : Color.white);

@@ -31,57 +31,57 @@ public class SausageCache
     public static class Key {
         public final int width;
         public final int height;
-        public final Font font;
         public final Color bgcolor;
         public final BufferedImage bgimage;
+        public final Font font;
         public final String text;
         public final int align;
 
-        public Key (int width, int height, Font font, Color bgcolor, BufferedImage bgimage,
-                    String text, int align) {
+        public Key (int width, int height, Color bgcolor, BufferedImage bgimage,
+                    Font font, String text, int align) {
             this.width = width;
             this.height = height;
-            this.font = font;
             this.bgcolor = bgcolor;
             this.bgimage = bgimage;
+            this.font = font;
             this.text = text;
             this.align = align;
         }
 
         public Key setBackground (BufferedImage nbgimage) {
-            return new Key(width, height, font, bgcolor, nbgimage, text, align);
+            return new Key(width, height, bgcolor, nbgimage, font, text, align);
         }
 
         public Key setBackground (Color nbgcolor) {
-            return new Key(width, height, font, nbgcolor, bgimage, text, align);
+            return new Key(width, height, nbgcolor, bgimage, font, text, align);
         }
 
         public Key setText (String ntext) {
-            return new Key(width, height, font, bgcolor, bgimage, ntext, align);
+            return new Key(width, height, bgcolor, bgimage, font, ntext, align);
         }
 
         public Key setAlignment (int nalign) {
-            return new Key(width, height, font, bgcolor, bgimage, text, nalign);
+            return new Key(width, height, bgcolor, bgimage, font, text, nalign);
         }
 
         @Override public boolean equals (Object other) {
             Key okey = (Key)other;
-            return (okey.width == width && okey.height == height && okey.font.equals(font) &&
-                    okey.bgcolor.equals(bgcolor) && okey.bgimage == bgimage &&
-                    okey.text.equals(text) && okey.align == align);
+            return (okey.width == width && okey.height == height &&
+                    okey.bgcolor.equals(bgcolor) && okey.bgimage == bgimage /*&&
+                    okey.font.equals(font) && okey.text.equals(text) && okey.align == align*/);
         }
 
         @Override public int hashCode () {
             int code = 17;
             code = 31 * code + width;
             code = 31 * code + height;
-            code = 31 * code + font.hashCode();
             code = 31 * code + bgcolor.hashCode();
             if (bgimage != null) {
                 code = 31 * code + bgimage.hashCode();
             }
-            code = 31 * code + text.hashCode();
-            code = 31 * code + align;
+//             code = 31 * code + font.hashCode();
+//             code = 31 * code + text.hashCode();
+//             code = 31 * code + align;
             return code;
         }
     }
