@@ -12,6 +12,7 @@
 -libraryjars lib/javalayer.jar
 -libraryjars <java.home>/lib/rt.jar
 
+-dontskipnonpubliclibraryclasses
 -outjars dist/enormous-pro.jar
 -printseeds dist/proguard.seeds
 -printmapping dist/proguard.map
