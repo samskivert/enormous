@@ -14,7 +14,10 @@ import java.io.InputStream;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.Properties;
+
+import com.google.common.collect.Lists;
 
 import com.samskivert.util.Config;
 
@@ -23,6 +26,23 @@ import com.samskivert.util.Config;
  */
 public class EnormousConfig
 {
+    public static class Alarm
+    {
+        public final int index;
+        public final String text;
+        public final int bonus;
+        public final int weight;
+        public final int minPostChangeQs;
+
+        public Alarm (int index, String text, int bonus, int weight, int minPostChangeQs) {
+            this.index = index;
+            this.text = text;
+            this.bonus = bonus;
+            this.weight = weight;
+            this.minPostChangeQs = minPostChangeQs;
+        }
+    }
+
     /** Provides access to configuration data. */
     public static Config config;
 
@@ -214,8 +234,7 @@ public class EnormousConfig
     }
 
     /**
-     * Returns an array indicating how many points are required to get certain
-     * numbers of stars.
+     * Returns an array indicating how many points are required to get certain numbers of stars.
      */
     public static int[] getStarPoints ()
     {
@@ -311,28 +330,18 @@ public class EnormousConfig
     }
 
     /**
-     * Returns the number of different alarms that are available.
+     * Returns the alarms that are available.
      */
-    public static int[] getAlarmWeights ()
+    public static List<Alarm> getAlarms ()
     {
-        return config.getValue("alarm_weights", new int[0]);
-    }
-
-    /**
-     * Returns the number of different alarms that are available.
-     */
-    public static String getAlarmText (int alarm)
-    {
-        return config.getValue("alarm_text." + alarm, "Food Fight!");
-    }
-
-    /**
-     * Returns the number of bonus points associated with the question
-     * following the alarm, if any.
-     */
-    public static int getAlarmBonus (int alarm)
-    {
-        return config.getValue("alarm_bonus." + alarm, 0);
+        List<Alarm> alarms = Lists.newArrayList();
+        String text;
+        for (int ii = 0; (text = config.getValue("alarm_text." + ii, (String)null)) != null; ii++) {
+            alarms.add(new Alarm(ii, text, config.getValue("alarm_bonus." + ii, 0),
+                                 config.getValue("alarm_weight." + ii, 1),
+                                 config.getValue("alarm_changeqs." + ii, 1)));
+        }
+        return alarms;
     }
 
     /**

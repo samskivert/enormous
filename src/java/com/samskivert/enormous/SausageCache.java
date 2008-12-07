@@ -16,8 +16,9 @@ import java.awt.Transparency;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 
-import java.util.HashMap;
 import java.util.Map;
+
+import com.google.common.collect.Maps;
 
 import com.samskivert.swing.Label;
 import com.samskivert.swing.util.SwingUtil;
@@ -143,7 +144,7 @@ public class SausageCache
         // no constructy
     }
 
-    protected static Map<Key, BufferedImage> _cache = new HashMap<Key, BufferedImage>();
+    protected static Map<Key, BufferedImage> _cache = Maps.newHashMap();
     protected static GraphicsConfiguration _gc;
     static {
         GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();

@@ -3,7 +3,9 @@
 
 package com.samskivert.enormous;
 
-import java.util.ArrayList;
+import java.util.List;
+
+import com.google.common.collect.Lists;
 
 /**
  * Contains information on a particular team.
@@ -14,5 +16,5 @@ public class Team
 
     public Player active;
 
-    public ArrayList<Player> players = new ArrayList<Player>();
+    public List<Player> players = Lists.newArrayList();
 }

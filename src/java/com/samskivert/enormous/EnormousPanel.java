@@ -23,10 +23,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import com.samskivert.swing.Controller;
 import com.samskivert.swing.ControllerProvider;
@@ -402,7 +403,7 @@ public class EnormousPanel extends MediaPanel
 
         for (int round = 0; hadQuestions; round++) {
             hadQuestions = false;
-            List<String> errors = new ArrayList<String>();
+            List<String> errors = Lists.newArrayList();
             for (int cc = 0; cc < EnormousConfig.getCategoryCount(round); cc++) {
                 String cname = EnormousConfig.getCategory(round, cc);
                 if (!EnormousConfig.haveCategory(round, cc)) {
@@ -674,7 +675,7 @@ public class EnormousPanel extends MediaPanel
     protected int _round = -1;
 
     protected SausageSprite[] _catsprites;
-    protected Map<Integer,SausageSprite> _qsprites = new HashMap<Integer,SausageSprite>();
+    protected Map<Integer,SausageSprite> _qsprites = Maps.newHashMap();
     protected TeamSprite[] _tsprites;
 
     protected SausageSprite _qsprite;

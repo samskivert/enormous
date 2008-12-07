@@ -5,8 +5,14 @@ package com.samskivert.enormous;
 
 import java.applet.AudioClip;
 import java.awt.event.ActionEvent;
-import java.util.ArrayList;
-import java.util.HashMap;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import com.samskivert.swing.Controller;
 import com.samskivert.util.RandomUtil;
@@ -42,9 +48,8 @@ public class EnormousController extends Controller
         loadSound("question_warn");
         loadSound("question_cancel");
 
-        int[] aweights = EnormousConfig.getAlarmWeights();
-        for (int ii = 0; ii < aweights.length; ii++) {
-            loadSound("alarm_sound." + ii);
+        for (EnormousConfig.Alarm alarm : EnormousConfig.getAlarms()) {
+            loadSound("alarm_sound." + alarm.index);
         }
 
         // determine our question timers
@@ -92,6 +97,9 @@ public class EnormousController extends Controller
         }
         _panel.getTeamSprite(teamIndex).setPlayer(active);
         _panel.clearTeamConfig();
+
+        // clear out our "questions since change"
+        _changeQs.clear();
     }
 
     public void configureTeams (TeamSprite[] sprites)
@@ -231,40 +239,7 @@ public class EnormousController extends Controller
         String cmd = action.getActionCommand();
         if (cmd.startsWith("question:")) {
             String[] bits = StringUtil.split(cmd, ":");
-            boolean noalarm = (bits.length > 3);
-
-            // clear out any unclaimed bonus if we might have a new alarm
-            if (!noalarm) {
-                _bonus = 0;
-            }
-
-            // randomly during a round, we pop up a special alarm instead of immediately going to a
-            // new question
-            int[] aweights = EnormousConfig.getAlarmWeights();
-            if (!noalarm && aweights.length > 0 && _questions > 1 &&
-                RandomUtil.getInt(100) < EnormousConfig.getAlarmFrequency()) {
-                int aidx = RandomUtil.getWeightedIndex(aweights);
-                playSound("alarm_sound." + aidx);
-                String text = EnormousConfig.getAlarmText(aidx);
-                _bonus = EnormousConfig.getAlarmBonus(aidx);
-                if (_bonus > 0) {
-                    text += "\nNext question bonus: " + _bonus;
-                }
-                _panel.displayAlarm(text, (_bonus > 0) ? cmd + ":noalarm" : "dismiss");
-                _questions = 0;
-
-            } else {
-                try {
-                    int catidx = Integer.parseInt(bits[1]);
-                    int qidx = Integer.parseInt(bits[2]);
-                    _panel.displayQuestion(catidx, qidx);
-                    _questions++;
-                    startQuestionTimers(0L);
-
-                } catch (Exception e) {
-                    e.printStackTrace(System.err);
-                }
-            }
+            questionClicked(Integer.parseInt(bits[1]), Integer.parseInt(bits[2]), bits.length > 3);
 
         } else if (cmd.startsWith("team:")) {
             String[] bits = StringUtil.split(cmd, ":");
@@ -291,7 +266,9 @@ public class EnormousController extends Controller
 
         } else if (cmd.equals("next_round")) {
             _panel.setRound(_panel._round+1);
+            // clear out our various trackers
             _questions = 0;
+            _changeQs.clear();
 
         } else if (cmd.equals("dismiss")) {
             dismissQuestion();
@@ -307,6 +284,65 @@ public class EnormousController extends Controller
         }
 
         return true;
+    }
+
+    protected void questionClicked (int catidx, int qidx, boolean noalarm)
+    {
+        // clear out any unclaimed bonus if we might have a new alarm
+        if (!noalarm) {
+            _bonus = 0;
+        }
+
+        // occasionally, we pop up an alarm instead of immediately going to a new question
+        EnormousConfig.Alarm alarm = noalarm ? null : pickAlarm(catidx, qidx);
+        if (alarm != null) {
+            String text = alarm.text;
+            _bonus = alarm.bonus;
+            if (_bonus > 0) {
+                text += "\nNext question bonus: " + _bonus;
+            }
+
+            // display the alarm
+            playSound("alarm_sound." + alarm.index);
+            _panel.displayAlarm(text, (_bonus == 0) ? "dismiss" :
+                                "question:" + catidx + ":" + qidx + ":noalarm");
+
+            // clear out our "questions since last alarm" counter
+            _questions = 0;
+            return;
+        }
+
+        // display the qeustion
+        _panel.displayQuestion(catidx, qidx);
+
+        // increment our count of questions since the last alarm
+        _questions++;
+
+        // start the questions timer
+        startQuestionTimers(0L);
+
+        // add this question to our "questions since change" set
+        _changeQs.add(catidx + ":" + qidx);
+    }
+
+    protected EnormousConfig.Alarm pickAlarm (int catidx, int qidx)
+    {
+        // filter out alarms that only happen after more post-change questions
+        List<EnormousConfig.Alarm> allowed = Lists.newArrayList();
+        for (EnormousConfig.Alarm alarm : EnormousConfig.getAlarms()) {
+            if (alarm.minPostChangeQs < _changeQs.size()) {
+                allowed.add(alarm);
+            }
+        }
+        if (allowed.isEmpty()) {
+            return null;
+        }
+
+        int[] weights = new int[allowed.size()];
+        for (int ii = 0; ii < weights.length; ii++) {
+            weights[ii] = allowed.get(ii).weight;
+        }
+        return allowed.get(RandomUtil.getWeightedIndex(weights));
     }
 
     /**
@@ -371,8 +407,10 @@ public class EnormousController extends Controller
 
     protected EnormousPanel _panel;
     protected Team[] _teams;
-    protected HashMap<String,AudioClip> _clips =
-        new HashMap<String,AudioClip>();
+    protected Map<String,AudioClip> _clips = Maps.newHashMap();
+
+    /** The set of questions asked since we changed players. */
+    protected Set<String> _changeQs = Sets.newHashSet();
 
     protected int _responder = -1;
     protected int _questions = 0;
