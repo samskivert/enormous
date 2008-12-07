@@ -154,13 +154,9 @@ public class EnormousPanel extends MediaPanel
         return _tsprites[teamIdx];
     }
 
-    /**
-     * Displays the specified alarm.
-     */
     public void displayAlarm (String text, String command)
     {
-        // this only happens if someone is getting crazy click happy, so just
-        // ignore them
+        // this only happens if someone is getting crazy click happy, so just ignore them
         if (_qsprite != null) {
             return;
         }
@@ -168,17 +164,13 @@ public class EnormousPanel extends MediaPanel
         int width = getWidth() - 2*GAP;
         int height = getHeight() - HEADER - FOOTER - 4*GAP;
         _qsprite = new SausageSprite(
-            width, height, text, EnormousConfig.questionFont,
-            EnormousConfig.questionColor, command);
+            width, height, text, EnormousConfig.questionFont, EnormousConfig.questionColor, command);
         _qsprite.setRenderOrder(25);
         _qsprite.setLocation(-width, HEADER + 2*GAP);
         _qsprite.move(new LinePath(new Point(GAP, HEADER + 2*GAP), 500L));
         addSprite(_qsprite);
     }
 
-    /**
-     * Displays the specified question.
-     */
     public void displayQuestion (int catidx, int qidx)
     {
         // no go if we're display a team configuration currently
@@ -244,6 +236,11 @@ public class EnormousPanel extends MediaPanel
         }
     }
 
+    public void timeoutAnswer ()
+    {
+        _ctrl.answerWasIncorrect(_round, _acidx, _aqidx);
+    }
+
     public void restoreQuestion ()
     {
         if (_acidx != -1) {
@@ -263,9 +260,6 @@ public class EnormousPanel extends MediaPanel
         }
     }
 
-    /**
-     * Dismisses the currently displayed question.
-     */
     public void dismissQuestion (boolean remove)
     {
         // reenable the category titles

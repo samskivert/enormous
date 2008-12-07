@@ -39,11 +39,33 @@ public class EnormousController extends Controller
         loadSound("enorm_correct");
         loadSound("enorm_incorrect");
         loadSound("round_over");
+        loadSound("question_warn");
+        loadSound("question_cancel");
 
         int[] aweights = EnormousConfig.getAlarmWeights();
         for (int ii = 0; ii < aweights.length; ii++) {
             loadSound("alarm_sound." + ii);
         }
+
+        // determine our question timers
+        _warner = new Interval(EnormousApp.queue) {
+            public void expired () {
+                playSound("question_warn");
+            }
+        };
+        _canceler = new Interval(EnormousApp.queue) {
+            public void expired () {
+                playSound("question_cancel");
+                if (EnormousConfig.getQuestionCancelDismis()) {
+                    dismissQuestion();
+                }
+            }
+        };
+        _answerer = new Interval(EnormousApp.queue) {
+            public void expired () {
+                _panel.timeoutAnswer();
+            }
+        };
     }
 
     public void setActivePlayer (int teamIndex, String name)
@@ -130,6 +152,12 @@ public class EnormousController extends Controller
         // highlight only this team in the display
         _responder = teamIndex;
         _panel.highlightTeam(_responder);
+
+        // pause our question timers
+        pauseQuestionTimers();
+
+        // start the answer timeout
+        _answerer.schedule(EnormousConfig.getAnswerCancelTimer());
     }
 
     /**
@@ -141,22 +169,19 @@ public class EnormousController extends Controller
             System.err.println("No active responder.");
             return;
         }
-        final int responder = _responder;
-        _responder = -1;
 
+        final int responder = clearResponder();
         boolean enormous = (qidx == EnormousConfig.getQuestionCount(round)-1);
         int qscore = EnormousConfig.getQuestionScore(round, catidx, qidx);
         playSound(enormous ? "enorm_correct" : "correct");
 
         final int points = qscore + _bonus;
-        _panel.replaceQuestion(
-            enormous ? "That's ENORMOUS!" : "Correct!", true);
+        _panel.replaceQuestion(enormous ? "That's ENORMOUS!" : "Correct!", true);
         new Interval(EnormousApp.queue) {
             public void expired () {
                 // score points for the active player
                 _teams[responder].active.score += points;
-                _panel.getTeamSprite(responder).setPlayer(
-                    _teams[responder].active);
+                _panel.getTeamSprite(responder).setPlayer(_teams[responder].active);
                 _panel.dismissQuestion(true);
             }
         }.schedule(1000l);
@@ -171,24 +196,21 @@ public class EnormousController extends Controller
             System.err.println("No active responder.");
             return;
         }
-        final int responder = _responder;
-        _responder = -1;
 
+        final int responder = clearResponder();
         boolean enormous = (qidx == EnormousConfig.getQuestionCount(round)-1);
         final int points = EnormousConfig.getQuestionScore(round, catidx, qidx);
         playSound(enormous ? "enorm_incorrect" : "incorrect");
 
-        _panel.replaceQuestion(
-            enormous ? "That's ENORMOUSly wrong!" : "Bzzzzt!", false);
+        _panel.replaceQuestion(enormous ? "That's ENORMOUSly wrong!" : "Bzzzzt!", false);
         new Interval(EnormousApp.queue) {
             public void expired () {
                 // deduct points for the active player
-                _teams[responder].active.score =
-                    Math.max(_teams[responder].active.score - points, 0);
-                _panel.getTeamSprite(responder).setPlayer(
-                    _teams[responder].active);
+                _teams[responder].active.score = Math.max(_teams[responder].active.score-points, 0);
+                _panel.getTeamSprite(responder).setPlayer(_teams[responder].active);
                 _panel.showAllTeams();
                 _panel.restoreQuestion();
+                restartQuestionTimers();
             }
         }.schedule(1000l);
     }
@@ -198,8 +220,9 @@ public class EnormousController extends Controller
      */
     public void answerWasCanceled ()
     {
-        _responder = -1;
+        clearResponder();
         _panel.restoreQuestion();
+        restartQuestionTimers();
     }
 
     // documentation inherited
@@ -208,16 +231,17 @@ public class EnormousController extends Controller
         String cmd = action.getActionCommand();
         if (cmd.startsWith("question:")) {
             String[] bits = StringUtil.split(cmd, ":");
+            boolean noalarm = (bits.length > 3);
 
-            // clear out any unclaimed bonus
-            if (bits.length == 3) {
+            // clear out any unclaimed bonus if we might have a new alarm
+            if (!noalarm) {
                 _bonus = 0;
             }
 
             // randomly during a round, we pop up a special alarm instead of immediately going to a
             // new question
             int[] aweights = EnormousConfig.getAlarmWeights();
-            if (bits.length == 3 && aweights.length > 0 && _questions > 1 &&
+            if (!noalarm && aweights.length > 0 && _questions > 1 &&
                 RandomUtil.getInt(100) < EnormousConfig.getAlarmFrequency()) {
                 int aidx = RandomUtil.getWeightedIndex(aweights);
                 playSound("alarm_sound." + aidx);
@@ -226,8 +250,7 @@ public class EnormousController extends Controller
                 if (_bonus > 0) {
                     text += "\nNext question bonus: " + _bonus;
                 }
-                String acmd = (_bonus > 0) ? (cmd + ":noalarm") : "dismiss";
-                _panel.displayAlarm(text, acmd);
+                _panel.displayAlarm(text, (_bonus > 0) ? cmd + ":noalarm" : "dismiss");
                 _questions = 0;
 
             } else {
@@ -236,6 +259,8 @@ public class EnormousController extends Controller
                     int qidx = Integer.parseInt(bits[2]);
                     _panel.displayQuestion(catidx, qidx);
                     _questions++;
+                    startQuestionTimers(0L);
+
                 } catch (Exception e) {
                     e.printStackTrace(System.err);
                 }
@@ -269,8 +294,7 @@ public class EnormousController extends Controller
             _questions = 0;
 
         } else if (cmd.equals("dismiss")) {
-            _panel.dismissQuestion(false);
-            _responder = -1;
+            dismissQuestion();
 
         } else if (cmd.equals("clear_overlay")) {
             _panel.clearOverlaySprite();
@@ -283,6 +307,25 @@ public class EnormousController extends Controller
         }
 
         return true;
+    }
+
+    /**
+     * Returns the current responder, clears out the tracked responder and cancels our answer
+     * timeout.
+     */
+    protected int clearResponder ()
+    {
+        int responder = _responder;
+        _answerer.cancel();
+        _responder = -1;
+        return responder;
+    }
+
+    protected void dismissQuestion ()
+    {
+        clearResponder();
+        pauseQuestionTimers();
+        _panel.dismissQuestion(false);
     }
 
     protected void loadSound (String name)
@@ -303,6 +346,29 @@ public class EnormousController extends Controller
         }
     }
 
+    protected void startQuestionTimers (long elapsed)
+    {
+        _questionStart = System.currentTimeMillis() - elapsed;
+        // don't restart the warning timer if there's not at least a second left
+        if (EnormousConfig.getQuestionWarnTimer() - elapsed > 1000L) {
+            _warner.schedule(EnormousConfig.getQuestionWarnTimer() - elapsed);
+        }
+        // always give them one second before canceling
+        _canceler.schedule(Math.max(EnormousConfig.getQuestionCancelTimer() - elapsed, 1000L));
+    }
+
+    protected void pauseQuestionTimers ()
+    {
+        _questionPause = System.currentTimeMillis();
+        _warner.cancel();
+        _canceler.cancel();
+    }
+
+    protected void restartQuestionTimers ()
+    {
+        startQuestionTimers(_questionPause - _questionStart);
+    }
+
     protected EnormousPanel _panel;
     protected Team[] _teams;
     protected HashMap<String,AudioClip> _clips =
@@ -311,4 +377,7 @@ public class EnormousController extends Controller
     protected int _responder = -1;
     protected int _questions = 0;
     protected int _bonus;
+
+    protected long _questionStart, _questionPause;
+    protected Interval _warner, _canceler, _answerer;
 }

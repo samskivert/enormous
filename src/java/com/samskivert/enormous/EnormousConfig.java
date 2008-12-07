@@ -39,16 +39,16 @@ public class EnormousConfig
     public static Font teamFont;
 
     /** The background of the whole screen. */
-    public static Color backgroundColor = new Color(0x996600);
+    public static Color backgroundColor = new Color(0xAABBCC);
 
     /** The background of the categories on the main display. */
-    public static Color categoryColor = Color.red;
+    public static Color categoryColor = new Color(176, 22, 28);
 
     /** The background of the questions on the main display. */
-    public static Color questionColor = new Color(0x6699CC);
+    public static Color questionColor = new Color(0x1B2C4A);
 
     /** The background of the questions on the main display. */
-    public static Color seenQuestionColor = new Color(0x003366);
+    public static Color seenQuestionColor = new Color(0x3B4C6A);
 
     static {
         // load up our configuration
@@ -179,6 +179,38 @@ public class EnormousConfig
     public static int getQuestionCount (int round)
     {
         return config.getValue("question_count", 4);
+    }
+
+    /**
+     * Returns the number millis seconds after which we play the timeout warning sound.
+     */
+    public static long getQuestionWarnTimer ()
+    {
+        return config.getValue("question_warn_timer", 40) * 1000L;
+    }
+
+    /**
+     * Returns the number of millis after which a question times out.
+     */
+    public static long getQuestionCancelTimer ()
+    {
+        return config.getValue("question_cancel_timer", 60) * 1000L;
+    }
+
+    /**
+     * Returns whether or not we auto-dismiss the question when canceled.
+     */
+    public static boolean getQuestionCancelDismis ()
+    {
+        return config.getValue("question_cancel_dismiss", true);
+    }
+
+    /**
+     * Returns the number of millis after which an answer times out.
+     */
+    public static long getAnswerCancelTimer ()
+    {
+        return config.getValue("answer_cancel_timer", 20) * 1000L;
     }
 
     /**
