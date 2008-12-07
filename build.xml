@@ -34,7 +34,7 @@
 
   <!-- build the java class files -->
   <target name="compile" depends="prepare">
-    <javac srcdir="${src.dir}" destdir="${classes.dir}"
+    <javac srcdir="${src.dir}" destdir="${classes.dir}" source="1.5" target="1.5" 
            debug="on" optimize="on" deprecation="on">
       <classpath refid="classpath"/>
     </javac>
@@ -42,14 +42,12 @@
 
   <!-- builds our distribution files (war and jar) -->
   <target name="dist" depends="prepare,compile">
-    <jar destfile="${deploy.dir}/${dist.jar}"
-         basedir="${classes.dir}"/>
+    <jar destfile="${deploy.dir}/${dist.jar}" basedir="${classes.dir}"/>
   </target>
 
   <!-- optimizes, combines and removes dead code -->
   <target name="proguard" depends="dist">
-    <taskdef resource="proguard/ant/task.properties"
-             classpath="lib/proguard.jar"/>
+    <taskdef resource="proguard/ant/task.properties" classpath="lib/proguard.jar"/>
     <proguard configuration="etc/${app.name}.pro"/>
   </target>
 </project>
