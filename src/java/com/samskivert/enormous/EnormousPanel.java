@@ -6,6 +6,7 @@ package com.samskivert.enormous;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -39,6 +40,7 @@ import com.threerings.media.FrameManager;
 import com.threerings.media.MediaPanel;
 import com.threerings.media.image.BufferedMirage;
 import com.threerings.media.sprite.ImageSprite;
+import com.threerings.media.sprite.LabelSprite;
 import com.threerings.media.sprite.PathAdapter;
 import com.threerings.media.sprite.Sprite;
 import com.threerings.media.util.LinePath;
@@ -67,6 +69,25 @@ public class EnormousPanel extends MediaPanel
 
         // note the round
         _round = round;
+
+        // add a sprite showing how many points are needed for each star level
+        int[] spoints = EnormousConfig.getStarPoints();
+        StringBuilder startip = new StringBuilder();
+        for (int ii = 0; ii < spoints.length; ii++) {
+            if (ii > 0) {
+                startip.append("     ");
+            }
+            startip.append(spoints[ii]).append(" = ");
+            for (int ss = 0; ss <= ii; ss++) {
+                startip.append("✪");
+            }
+        }
+        LabelSprite tsprite = new LabelSprite(new Label(startip.toString()));
+        tsprite.setAntiAliased(true);
+        tsprite.getLabel().setFont(new Font("Helvetica", Font.PLAIN, 19));
+        tsprite.getLabel().setTextColor(Color.white);
+        addSprite(tsprite);
+        tsprite.setLocation((getWidth() - tsprite.getWidth())/2, getHeight()-tsprite.getHeight());
 
         // recreate our team sprites
         int width = getWidth() - 2*GAP, height = getHeight();
@@ -464,7 +485,9 @@ public class EnormousPanel extends MediaPanel
     public void addSprite (Sprite sprite)
     {
         super.addSprite(sprite);
-        ((ClearableActionSpriteHandler)_actionHandler).clearActiveSprite();
+        if (_actionHandler != null) {
+            ((ClearableActionSpriteHandler)_actionHandler).clearActiveSprite();
+        }
     }
 
     @Override // from MediaPanel
