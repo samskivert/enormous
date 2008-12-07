@@ -47,7 +47,7 @@ public class EnormousPanel extends MediaPanel
     {
         super(fmgr);
         _ctrl = new EnormousController(this);
-        fmgr.getFrame().addKeyListener(this);
+        fmgr.getManagedRoot().getWindow().addKeyListener(this);
     }
 
     /**

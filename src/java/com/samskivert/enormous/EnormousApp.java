@@ -8,7 +8,6 @@ import java.awt.DisplayMode;
 import java.awt.EventQueue;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
-import javax.swing.JFrame;
 
 import com.samskivert.swing.util.SwingUtil;
 import com.samskivert.util.Interval;
@@ -16,6 +15,7 @@ import com.samskivert.util.RunAnywhere;
 import com.samskivert.util.RunQueue;
 
 import com.threerings.media.FrameManager;
+import com.threerings.media.ManagedJFrame;
 import com.threerings.media.util.ModeUtil;
 
 /**
@@ -23,22 +23,15 @@ import com.threerings.media.util.ModeUtil;
  */
 public class EnormousApp
 {
-    public static RunQueue queue = new RunQueue() {
-        public void postRunnable (Runnable r) {
-            EventQueue.invokeLater(r);
-        }
-        public boolean isDispatchThread () {
-            return EventQueue.isDispatchThread();
-        }
-    };
+    public static final RunQueue queue = RunQueue.AWT;
 
-    public static JFrame frame;
+    public static ManagedJFrame frame;
 
     public static void main (String[] args)
     {
         // create and display the interface
-        frame = new JFrame("That's ENORMOUS");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame = new ManagedJFrame("That's ENORMOUS");
+        frame.setDefaultCloseOperation(ManagedJFrame.EXIT_ON_CLOSE);
 
         final FrameManager fmgr = FrameManager.newInstance(frame);
         final EnormousPanel panel = new EnormousPanel(fmgr);

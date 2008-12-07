@@ -138,7 +138,7 @@ public class SausageSprite extends Sprite
 
     protected void layoutLabel ()
     {
-        Graphics2D gfx = (Graphics2D)_mgr.getMediaPanel().getGraphics();
+        Graphics2D gfx = _mgr.createGraphics();
         if (gfx != null) {
             SwingUtil.activateAntiAliasing(gfx);
             layoutLabel(gfx);

@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.samskivert.swing.Controller;
-import com.threerings.util.RandomUtil;
+import com.samskivert.util.RandomUtil;
 import com.samskivert.util.Interval;
 import com.samskivert.util.StringUtil;
 
