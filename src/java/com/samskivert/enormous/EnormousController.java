@@ -214,8 +214,8 @@ public class EnormousController extends Controller
                 _bonus = 0;
             }
 
-            // randomly during a round, we pop up a special alarm instead
-            // of immediately going to a new question
+            // randomly during a round, we pop up a special alarm instead of immediately going to a
+            // new question
             int[] aweights = EnormousConfig.getAlarmWeights();
             if (bits.length == 3 && aweights.length > 0 && _questions > 1 &&
                 RandomUtil.getInt(100) < EnormousConfig.getAlarmFrequency()) {
@@ -271,6 +271,9 @@ public class EnormousController extends Controller
         } else if (cmd.equals("dismiss")) {
             _panel.dismissQuestion(false);
             _responder = -1;
+
+        } else if (cmd.equals("clear_overlay")) {
+            _panel.clearOverlaySprite();
 
         } else if (cmd.equals("noop")) {
             // they clicked on a cleared out sprite, no problem

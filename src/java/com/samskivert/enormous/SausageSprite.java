@@ -86,6 +86,14 @@ public class SausageSprite extends Sprite
         _action = action;
     }
 
+    /**
+     * Changes this label's alignment (the default is {@link Label#CENTER}).
+     */
+    public void setAlignment (int align)
+    {
+        _label.setAlignment(align);
+    }
+
     // documentation inherited from interface ActionSprite
     public String getActionCommand ()
     {

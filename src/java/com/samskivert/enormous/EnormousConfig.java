@@ -26,6 +26,9 @@ public class EnormousConfig
     /** Provides access to configuration data. */
     public static Config config;
 
+    /** Provides access to question data. */
+    public static Config questions;
+
     /** The font used to display category selection text. */
     public static Font categoryFont;
 
@@ -49,14 +52,8 @@ public class EnormousConfig
 
     static {
         // load up our configuration
-        Properties props = new Properties();
-        String path = getPath("enormous.properties");
-        try {
-            props.load(new FileInputStream(path));
-        } catch (IOException ioe) {
-            System.err.println("Error loading '" + path + "': " + ioe);
-        }
-        config = new Config("enormous", props);
+        config = makeConfig("enormous");
+        questions = makeConfig("questions");
     }
 
     /**
@@ -196,10 +193,19 @@ public class EnormousConfig
     /**
      * Returns the name of the specified category in the specified round.
      */
-    public static String getCategory (int round, int index)
+    public static String getCategory (int round, int catidx)
     {
-        return config.getValue("category_name." + round + "." + index,
-                               "category." + round + "." + index);
+        return questions.getValue("category_name." + round + "." + catidx,
+                                  "category." + round + "." + catidx);
+    }
+
+    /**
+     * Returns true if we have a value defined for the specified category.
+     */
+    public static boolean haveCategory (int round, int catidx)
+    {
+        String key = "category_name." + round + "." + catidx;
+        return questions.getValue(key, (String)null) != null;
     }
 
     /**
@@ -209,8 +215,8 @@ public class EnormousConfig
     public static String getCategoryImage (int round, int index)
     {
         String defimg = config.getValue("category_image", (String)null);
-        defimg = config.getValue("category_image." + index, defimg);
-        return config.getValue("category_image." + round + "." + index, defimg);
+        defimg = questions.getValue("category_image." + index, defimg);
+        return questions.getValue("category_image." + round + "." + index, defimg);
     }
 
     /**
@@ -218,8 +224,7 @@ public class EnormousConfig
      */
     public static String getQuestionName (int round, int catidx, int questidx)
     {
-        return config.getValue("question_name." + questidx,
-                               "question." + questidx);
+        return config.getValue("question_name." + questidx, "question." + questidx);
     }
 
     /**
@@ -228,7 +233,7 @@ public class EnormousConfig
     public static String getQuestionFile (int round, int catidx, int questidx)
     {
         String key = "question_file." + round + "." + catidx + "." + questidx;
-        return config.getValue(key, "");
+        return questions.getValue(key, "");
     }
 
     /**
@@ -237,8 +242,8 @@ public class EnormousConfig
     public static int getQuestionScore (int round, int catidx, int questidx)
     {
         // look for a custom score for this question
-        int score = config.getValue("question_score." + round + "." +
-                                    catidx + "." + questidx, -1);
+        int score = questions.getValue(
+            "question_score." + round + "." + catidx + "." + questidx, -1);
         if (score == -1) {
             // fall back to the default score for a question of this size
             score = config.getValue("question_score." + questidx, 1);
@@ -252,8 +257,17 @@ public class EnormousConfig
     public static String getQuestion (int round, int catidx, int questidx)
     {
         String key = "question." + round + "." + catidx + "." + questidx;
-        String def = "What is the airspeed velocity of an unladen swallow?";
-        return config.getValue(key, def);
+        String def = "Oh noez! This question is missing!";
+        return questions.getValue(key, def);
+    }
+
+    /**
+     * Returns true if we have a value defined for the specified question.
+     */
+    public static boolean haveQuestion (int round, int catidx, int questidx)
+    {
+        String key = "question." + round + "." + catidx + "." + questidx;
+        return questions.getValue(key, (String)null) != null;
     }
 
     /**
@@ -296,5 +310,17 @@ public class EnormousConfig
     public static String getAudioFile (String fkey)
     {
         return config.getValue("audio_file." + fkey, (String)null);
+    }
+
+    protected static Config makeConfig (String propsId)
+    {
+        Properties props = new Properties();
+        String path = getPath(propsId + ".properties");
+        try {
+            props.load(new FileInputStream(path));
+        } catch (IOException ioe) {
+            System.err.println("Error loading '" + path + "': " + ioe);
+        }
+        return new Config(propsId, props);
     }
 }

@@ -66,10 +66,10 @@ public class EnormousApp
             }
         }.schedule(2000L);
 
-        // start the first round
+        // start by validating the configuration
         EventQueue.invokeLater(new Runnable() {
             public void run () {
-                panel.setRound(0);
+                panel.validateConfig();
             }
         });
     }
