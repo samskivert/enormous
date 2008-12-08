@@ -330,6 +330,11 @@ public class EnormousController extends Controller
 
     protected Alarm pickAlarm (int catidx, int qidx)
     {
+        // we only pick alarms with a small random frequency
+        if (RandomUtil.getInt(100) > EnormousConfig.getAlarmFrequency()) {
+            return null;
+        }
+
         // filter out alarms that only happen after more post-change questions
         List<Alarm> alarms = Lists.newArrayList(
             Iterables.filter(EnormousConfig.getAlarms(), new Predicate<Alarm>() {
