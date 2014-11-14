@@ -6,7 +6,7 @@ some.
 
 It's all pretty "installation art" quality, but I put it up here for historical amusements.
 
-## That's Enormous! Controls
+## Controls
 
 Click the names of players to configure the first and subsequent active player for that team.
 
