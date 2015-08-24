@@ -63,6 +63,7 @@ public class EnormousApp
         new Interval(queue) {
             public void expired () {
                 fmgr.start();
+                panel.repaint(); // work around non-full repaint bug
             }
         }.schedule(2000L);
 

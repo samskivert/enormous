@@ -370,6 +370,6 @@ public class EnormousConfig
         } catch (IOException ioe) {
             System.err.println("Error loading '" + path + "': " + ioe);
         }
-        return new Config(propsId, props);
+        return new Config(props);
     }
 }
