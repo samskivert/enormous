@@ -42,8 +42,7 @@ public class EnormousApp
         GraphicsDevice gd = env.getDefaultScreenDevice();
         System.out.println("FS " + System.getProperty("full_screen") +
                            " SUP " + gd.isFullScreenSupported());
-        if (System.getProperty("full_screen") != null &&
-            gd.isFullScreenSupported()) {
+        if (EnormousConfig.fullScreen() && gd.isFullScreenSupported()) {
             // set up full screen mode if we're on vinders
             frame.setUndecorated(true);
             gd.setFullScreenWindow(frame);
@@ -65,7 +64,7 @@ public class EnormousApp
                 fmgr.start();
                 panel.repaint(); // work around non-full repaint bug
             }
-        }.schedule(2000L);
+        }.schedule(100L);
 
         // start by validating the configuration
         EventQueue.invokeLater(new Runnable() {

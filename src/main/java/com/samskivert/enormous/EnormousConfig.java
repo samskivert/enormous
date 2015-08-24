@@ -135,6 +135,10 @@ public class EnormousConfig
         }
     }
 
+    public static boolean fullScreen () {
+        return config.getValue("full_screen", false);
+    }
+
     /**
      * Returns the number of teams.
      */
