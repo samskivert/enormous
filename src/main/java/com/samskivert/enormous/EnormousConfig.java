@@ -120,7 +120,15 @@ public class EnormousConfig
         File enormous = new File(desktop, "enormous");
         if (enormous.exists()) {
             return new File(enormous, path).getPath();
-        } else if (desktop.exists()) {
+        }
+
+        File cwd = new File(System.getProperty("user.dir"));
+        File sample = new File(cwd, "sample");
+        if (sample.exists()) {
+            return new File(sample, path).getPath();
+        }
+
+        if (desktop.exists()) {
             return new File(desktop, path).getPath();
         } else {
             return new File(home, path).getPath();

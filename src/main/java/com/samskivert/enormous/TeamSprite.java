@@ -36,7 +36,7 @@ public class TeamSprite extends SausageSprite
 
         try {
             if (_star == null) {
-                String path = "rsrc/media/star.png";
+                String path = "media/star.png";
                 InputStream in =
                     getClass().getClassLoader().getResourceAsStream(path);
                 _star = ImageIO.read(in);
