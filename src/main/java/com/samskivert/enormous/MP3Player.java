@@ -4,7 +4,8 @@
 package com.samskivert.enormous;
 
 import java.applet.AudioClip;
-import java.io.InputStream;
+import java.io.File;
+import java.io.FileInputStream;
 
 import javazoom.jl.decoder.JavaLayerException;
 import javazoom.jl.player.Player;
@@ -17,50 +18,49 @@ import com.samskivert.util.LoopingThread;
 public class MP3Player
     implements AudioClip
 {
-    public MP3Player (InputStream clip)
+    public MP3Player (File clip)
     {
+        _clip = clip;
+    }
+
+    // documentation inherited from interface AudioClip
+    public void play ()
+    {
+        stop();
         try {
-            _player = new Player(clip);
+            final Player player = new Player(new FileInputStream(_clip));
             _thread = new LoopingThread() {
                 protected void iterate () {
                     try {
-                        _player.play(50);
+                        player.play(50);
                     } catch (JavaLayerException jle) {
                         jle.printStackTrace(System.err);
                         shutdown();
                     }
                 }
                 protected void didShutdown () {
-                    _player.close();
+                    player.close();
+                    if (_thread == this) _thread = null;
                 }
             };
-        } catch (JavaLayerException jle) {
-            jle.printStackTrace(System.err);
-        }
-    }
-
-    // documentation inherited from interface AudioClip
-    public void play ()
-    {
-        if (_thread != null) {
             _thread.start();
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
         }
     }
 
     // documentation inherited from interface AudioClip
-    public void loop ()
-    {
-        // not supported
-    }
+    public void loop () {} // not supported
 
     // documentation inherited from interface AudioClip
     public void stop ()
     {
         if (_thread != null) {
             _thread.shutdown();
+            _thread = null;
         }
     }
 
-    protected Player _player;
+    protected File _clip;
     protected LoopingThread _thread;
 }

@@ -574,7 +574,7 @@ public class EnormousPanel extends MediaPanel
     protected AudioClip loadSound (String path)
     {
         if (path.toLowerCase().endsWith("mp3")) {
-            return new MP3Player(EnormousConfig.getResourceAsStream(path));
+            return new MP3Player(EnormousConfig.getResourceFile(path));
         } else if (path.toLowerCase().endsWith("wav")) {
             return new WAVPlayer(EnormousConfig.getResourceFile(path));
         } else {
